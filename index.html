@@ -788,6 +788,63 @@
     }
     .extra-cancel-btn:hover { border-color: var(--text-2); }
 
+    /* ── ANNOUNCEMENT BAR ── */
+    .ann-bar {
+      padding: 0 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .ann-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border-radius: var(--r-nav);
+      border-left: 3px solid transparent;
+      font-size: 13px;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .ann-item.urgent  { background: #FFF1F1; border-left-color: var(--red); }
+    .ann-item.warning { background: #FFFBEB; border-left-color: #F59E0B; }
+    .ann-item.notice  { background: #F0F9FF; border-left-color: #38BDF8; }
+
+    .ann-when {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      min-width: 58px;
+    }
+
+    .ann-item.urgent  .ann-when { color: var(--red); }
+    .ann-item.warning .ann-when { color: #B45309; }
+    .ann-item.notice  .ann-when { color: #0369A1; }
+
+    .ann-name { font-weight: 500; flex: 1; color: var(--text); }
+    .ann-amount { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text-2); }
+
+    .ann-dismiss {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); font-size: 16px; line-height: 1;
+      padding: 0 2px; border-radius: 4px; transition: color 0.12s;
+      flex-shrink: 0;
+    }
+    .ann-dismiss:hover { color: var(--text); }
+
+    @media (max-width: 700px) {
+      .ann-bar { padding: 0 12px; }
+    }
+
     /* ── ZOSTATOK SECTION ── */
     .zost-input-card {
       background: var(--card); border: 0.5px solid var(--border);
@@ -880,6 +937,7 @@
   <aside class="sidebar" id="sidebar"></aside>
   <div class="main">
     <div class="mobile-month-bar" id="mobile-month-bar"></div>
+    <div id="announcement-bar"></div>
     <div class="page-header" id="page-header"></div>
     <div class="content" id="content"></div>
   </div>
@@ -2036,6 +2094,78 @@ function startEdit(el, currentVal, onSave) {
 // INIT
 // ═══════════════════════════════════════════════════════
 
+// Dismissed IDs this session
+const dismissedAnn = new Set();
+
+function getUpcomingEvents() {
+  const results = [];
+  const ty = now.getFullYear(), tm = now.getMonth() + 1, td = now.getDate();
+
+  for (let offset = 0; offset <= 2; offset++) {
+    const d = new Date(ty, tm - 1, td + offset);
+    const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
+
+    // Fixed expenses + reminders
+    getFixedForMonth(y, m).forEach(ev => {
+      if (ev.day === day) results.push({ ...ev, offset, y, m, day });
+    });
+    // Domain renewals
+    getDomainsForMonth(y, m).forEach(dv => {
+      const dt = new Date(dv.renewDate);
+      if (dt.getDate() === day) results.push({ ...dv, isDomain: true, offset, y, m, day });
+    });
+    // Custom expenses
+    getCustomExpenses(y, m).filter(e => e.day === day).forEach(e =>
+      results.push({ ...e, isCustomExpense: true, offset, y, m, day })
+    );
+    // Extra incomes
+    getExtraIncomes(y, m).filter(e => e.day === day).forEach(e =>
+      results.push({ ...e, isIncome: true, payType: 'income', offset, y, m, day })
+    );
+    // Main income
+    if (day === INCOME_DAY) results.push({ id: 'income_ann_' + offset, name: 'Výplata', isIncome: true, payType: 'income', amount: getIncome(y, m), offset, y, m, day });
+  }
+
+  return results.filter(ev => !dismissedAnn.has(ev.id + '-' + ev.y + '-' + ev.m + '-' + ev.day));
+}
+
+function renderAnnouncementBar() {
+  const bar = document.getElementById('announcement-bar');
+  bar.innerHTML = '';
+
+  const events = getUpcomingEvents();
+  if (events.length === 0) return;
+
+  const wrap = h('div', { className: 'ann-bar' });
+
+  events.forEach(ev => {
+    const urgency = ev.offset === 0 ? 'urgent' : ev.offset === 1 ? 'warning' : 'notice';
+    const whenLabel = ev.offset === 0 ? 'Dnes' : ev.offset === 1 ? 'Zajtra' : 'Pozajtra';
+
+    const item = h('div', { className: 'ann-item ' + urgency });
+
+    item.appendChild(h('span', { className: 'ann-when' }, [whenLabel]));
+    item.appendChild(makeTag(ev));
+    item.appendChild(h('span', { className: 'ann-name' }, [ev.name]));
+
+    if (ev.amount) {
+      const prefix = ev.isIncome ? '+' : '−';
+      item.appendChild(h('span', { className: 'ann-amount' }, [prefix + fmt(ev.amount)]));
+    }
+
+    const dismissBtn = h('button', { className: 'ann-dismiss', title: 'Skryť' }, ['×']);
+    dismissBtn.onclick = () => {
+      dismissedAnn.add(ev.id + '-' + ev.y + '-' + ev.m + '-' + ev.day);
+      renderAnnouncementBar();
+    };
+    item.appendChild(dismissBtn);
+
+    wrap.appendChild(item);
+  });
+
+  bar.appendChild(wrap);
+}
+
 function renderMobileNav() {
   const nav = document.getElementById('mobile-nav');
   nav.innerHTML = '';
@@ -2065,6 +2195,7 @@ function renderMobileMonthBar() {
 
 function render() {
   renderSidebar();
+  renderAnnouncementBar();
   renderPageHeader();
   renderContent();
   renderMobileNav();
