@@ -980,6 +980,163 @@
       background: var(--sky-light);
     }
     .list-row.reminder-row:hover { background: #E1F4FD; }
+
+    /* ── UNIVERSAL ENTRY FORM ── */
+    .entry-form-card {
+      background: var(--card);
+      border: 0.5px solid var(--green);
+      border-radius: var(--r-card);
+      padding: 16px;
+      margin: 8px 0;
+    }
+    .entry-form-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .entry-type-toggle {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+    }
+    .entry-type-btn {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      background: none;
+      color: var(--text-3);
+      transition: all 0.15s;
+    }
+    .entry-type-btn.active-income { background: var(--green-light); color: var(--green); }
+    .entry-type-btn.active-expense { background: var(--red-light); color: var(--red); }
+    .entry-form-fields {
+      display: grid;
+      grid-template-columns: 1fr 100px 60px;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .entry-field {
+      border: 0.5px solid var(--border);
+      border-radius: 7px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.12s;
+    }
+    .entry-field:focus { border-color: var(--green); }
+    .entry-recurring-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--text-2);
+      cursor: pointer;
+    }
+    .entry-recurring-row input[type=checkbox] {
+      width: 15px; height: 15px; accent-color: var(--green); cursor: pointer;
+    }
+    .entry-form-actions { display: flex; gap: 6px; }
+    .entry-save-btn {
+      flex: 1;
+      background: var(--green); color: #fff; border: none;
+      border-radius: 7px; padding: 8px 14px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.12s;
+    }
+    .entry-save-btn:hover { background: var(--green-hover); }
+    .entry-cancel-btn {
+      background: none; border: 0.5px solid var(--border);
+      border-radius: 7px; padding: 8px 14px;
+      font-size: 13px; cursor: pointer; color: var(--text-2); font-family: inherit;
+    }
+    .entry-cancel-btn:hover { border-color: var(--text-2); }
+    .add-entry-fab {
+      display: flex; align-items: center; gap: 7px;
+      width: 100%; padding: 9px 14px;
+      background: none; border: 0.5px dashed var(--border);
+      border-radius: var(--r-nav);
+      font-size: 13px; font-weight: 500; color: var(--text-3);
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+      margin: 8px 0;
+    }
+    .add-entry-fab:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
+
+    /* ── INVOICES ── */
+    .inv-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .inv-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 90px 100px 80px;
+      gap: 10px;
+      padding: 11px 16px;
+      border-bottom: 0.5px solid var(--border);
+      align-items: center;
+      transition: background 0.1s;
+    }
+    .inv-row:hover { background: var(--bg); }
+    .inv-row:last-child { border-bottom: none; }
+    .inv-row.inv-paid { opacity: 0.5; }
+    .inv-row.inv-overdue .inv-due { color: var(--red); font-weight: 700; }
+    .inv-row.inv-soon .inv-due { color: #B45309; font-weight: 600; }
+    .inv-th {
+      font-size: 10px; font-weight: 600; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .inv-name { font-size: 13px; font-weight: 500; }
+    .inv-client { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+    .inv-date { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text-2); }
+    .inv-due { font-size: 12px; font-variant-numeric: tabular-nums; }
+    .inv-amount { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--green); }
+    .inv-amount.paid { color: var(--text-3); }
+    .inv-ctrl { display: flex; gap: 4px; justify-content: flex-end; }
+    .inv-status-tag {
+      display: inline-flex; padding: 2px 7px; border-radius: 999px;
+      font-size: 10px; font-weight: 600; white-space: nowrap;
+    }
+    .inv-status-paid { background: var(--green-light); color: var(--green); }
+    .inv-status-overdue { background: var(--red-light); color: var(--red); }
+    .inv-status-soon { background: #FFFBEB; color: #B45309; }
+    .inv-status-open { background: var(--bg); color: var(--text-3); border: 0.5px solid var(--border); }
+    .inv-add-form {
+      background: var(--card); border: 0.5px solid var(--green);
+      border-radius: var(--r-card); padding: 16px; margin-bottom: 16px;
+    }
+    .inv-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .inv-form-grid .entry-field:first-child { grid-column: 1 / -1; }
+
+    @media (max-width: 700px) {
+      .inv-row { grid-template-columns: 1fr 80px 70px; gap: 8px; }
+      .inv-row > :nth-child(2), .inv-row > :nth-child(5) { display: none; }
+      .entry-form-fields { grid-template-columns: 1fr 90px 56px; }
+      .inv-form-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -1107,7 +1264,20 @@ const DOMAINS = [
 const STORAGE_KEY = 'drixton_finance_v3';
 
 function defaultState() {
-  return { startingBalance: 0, currentBalance: null, customIncome: {}, dphAmounts: {}, cancelledIds: [], paidIds: {}, extraIncomes: {}, customExpenses: {}, zostatok_excluded: {} };
+  return {
+    startingBalance: 0,
+    currentBalance: null,
+    customIncome: {},
+    dphAmounts: {},
+    cancelledIds: [],
+    paidIds: {},
+    extraIncomes: {},
+    customExpenses: {},
+    zostatok_excluded: {},
+    recurringExpenses: [],  // [{id, name, amount, day, startYM}]
+    recurringIncomes: [],   // [{id, name, amount, day, startYM}]
+    invoices: [],           // [{id, name, client, issueDate, dueDate, amount, paid}]
+  };
 }
 
 function loadState() {
@@ -1126,6 +1296,9 @@ let balanceView = 'month'; // 'month' | 'payday'
 let calView = true; // true = calendar, false = list
 let selectedDay = null;
 let showExtraForm = false;
+let showEntryForm = false;
+let entryFormContext = 'list'; // 'list' | 'zostatok'
+let showInvForm = false;
 
 // ═══════════════════════════════════════════════════════
 // BUSINESS LOGIC
@@ -1141,8 +1314,24 @@ function isSemiAnnual(exp, y, m) {
 
 function getIncome(y, m) { return state.customIncome[mkey(y,m)] ?? DEFAULT_INCOME; }
 function getDph(y, m) { return state.dphAmounts[mkey(y,m)] ?? DEFAULT_DPH; }
-function getExtraIncomes(y, m) { return state.extraIncomes[mkey(y,m)] || []; }
-function getCustomExpenses(y, m) { return state.customExpenses[mkey(y,m)] || []; }
+function getRecurringExpenses(y, m) {
+  const k = mkey(y, m);
+  return (state.recurringExpenses || []).filter(e => e.startYM <= k);
+}
+
+function getRecurringIncomes(y, m) {
+  const k = mkey(y, m);
+  return (state.recurringIncomes || []).filter(e => e.startYM <= k);
+}
+
+function getExtraIncomes(y, m) {
+  const oneTime = state.extraIncomes[mkey(y,m)] || [];
+  return [...oneTime, ...getRecurringIncomes(y, m)];
+}
+function getCustomExpenses(y, m) {
+  const oneTime = state.customExpenses[mkey(y,m)] || [];
+  return [...oneTime, ...getRecurringExpenses(y, m)];
+}
 function getTotalIncome(y, m) { return getIncome(y, m) + getExtraIncomes(y, m).reduce((s, e) => s + e.amount, 0); }
 
 function getFixedForMonth(y, m) {
@@ -1295,6 +1484,7 @@ function renderSidebar() {
   const navItems = [
     { id: 'platby',    label: 'Platobný kalendár', ico: 'calendar' },
     { id: 'zostatok',  label: 'Zostatok & výplata', ico: 'wallet' },
+    { id: 'faktury',   label: 'Faktúry',            ico: 'bell' },
     { id: 'domeny',    label: 'Domény & Hosting',  ico: 'globe' },
     { id: 'projekcia', label: 'Projekcia',          ico: 'trending' },
   ];
@@ -1392,6 +1582,30 @@ function renderSidebar() {
 
   bottom.appendChild(extraSec);
 
+  // Recurring items summary
+  const recurring = [...(state.recurringIncomes || []), ...(state.recurringExpenses || [])];
+  if (recurring.length > 0) {
+    const recSec = h('div', { style: 'margin-top:10px;' });
+    recSec.appendChild(h('div', { className: 'sb-bottom-label' }, ['Pravidelné položky']));
+    const recList = h('div', { className: 'extra-income-list' });
+    recurring.forEach(item => {
+      const isIncome = !!(state.recurringIncomes || []).find(r => r.id === item.id);
+      const row = h('div', { className: 'extra-income-row' });
+      row.appendChild(h('div', { className: 'extra-income-name' }, [item.name + ' (' + item.day + '.)']));
+      row.appendChild(h('div', { className: 'extra-income-amt', style: isIncome ? '' : 'color:var(--red)' }, [(isIncome ? '+' : '−') + fmt(item.amount)]));
+      const del = h('button', { className: 'extra-income-del', title: 'Odstrániť' }, ['×']);
+      del.onclick = () => {
+        if (isIncome) state.recurringIncomes = (state.recurringIncomes || []).filter(r => r.id !== item.id);
+        else state.recurringExpenses = (state.recurringExpenses || []).filter(r => r.id !== item.id);
+        saveState(); render();
+      };
+      row.appendChild(del);
+      recList.appendChild(row);
+    });
+    recSec.appendChild(recList);
+    bottom.appendChild(recSec);
+  }
+
   const isCurrent = viewYear === now.getFullYear() && viewMonth === now.getMonth() + 1;
   if (!isCurrent) {
     const tb = h('button', { className: 'today-btn-sm', style: 'margin-top:10px;width:100%;', onclick: () => { viewYear = now.getFullYear(); viewMonth = now.getMonth() + 1; render(); } }, ['Aktuálny mesiac']);
@@ -1415,7 +1629,7 @@ function renderPageHeader() {
   const ph = document.getElementById('page-header');
   ph.innerHTML = '';
 
-  const titles = { platby: 'Platobný kalendár', zostatok: 'Zostatok & výplata', domeny: 'Domény & Hosting', projekcia: 'Projekcia' };
+  const titles = { platby: 'Platobný kalendár', zostatok: 'Zostatok & výplata', faktury: 'Faktúry', domeny: 'Domény & Hosting', projekcia: 'Projekcia' };
   const title = h('div');
   title.appendChild(h('div', { className: 'page-title' }, [titles[activeSection]]));
   title.appendChild(h('div', { className: 'page-subtitle' }, [SK_MONTHS[viewMonth - 1] + ' ' + viewYear]));
@@ -1448,6 +1662,8 @@ function renderContent() {
     else el.appendChild(renderList());
   } else if (activeSection === 'zostatok') {
     el.appendChild(renderZostatok());
+  } else if (activeSection === 'faktury') {
+    el.appendChild(renderFaktury());
   } else if (activeSection === 'domeny') {
     el.appendChild(renderDomeny());
   } else {
@@ -1603,9 +1819,15 @@ function renderList(compact = false) {
   const events = getAllEventsForMonth(viewYear, viewMonth);
   events.forEach(ev => wrap.appendChild(renderListRow(ev)));
 
-  // Add expense button (not in compact mode)
+  // Add entry button (not in compact mode)
   if (!compact) {
-    wrap.appendChild(renderAddNakladBtn());
+    if (showEntryForm && entryFormContext === 'list') {
+      wrap.appendChild(renderEntryForm('list'));
+    } else {
+      const fab = h('button', { className: 'add-entry-fab', onclick: () => { showEntryForm = true; entryFormContext = 'list'; renderContent(); } });
+      fab.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Pridať príjem / výdavok</span>';
+      wrap.appendChild(fab);
+    }
   }
 
   // Total
@@ -1619,43 +1841,82 @@ function renderList(compact = false) {
   return wrap;
 }
 
-let showNakladForm = false;
+function renderEntryForm(context) {
+  let entryType = 'expense'; // 'income' | 'expense'
 
-function renderAddNakladBtn() {
-  const wrap = h('div', { style: 'margin: 8px 0 4px;' });
+  const card = h('div', { className: 'entry-form-card' });
+  card.appendChild(h('div', { className: 'entry-form-title' }, ['Pridať položku']));
 
-  if (showNakladForm) {
-    const form = h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 10px;background:var(--card);border:0.5px solid var(--green);border-radius:var(--r-nav);' });
+  // Type toggle
+  const typeToggle = h('div', { className: 'entry-type-toggle' });
+  const btnIncome = h('button', { className: 'entry-type-btn active-income' }, ['+ Príjem']);
+  const btnExpense = h('button', { className: 'entry-type-btn' }, ['− Výdavok']);
 
-    const nameIn = h('input', { type: 'text', className: 'extra-input', placeholder: 'Názov nákladu', style: 'flex:1;min-width:120px;' });
-    const amtIn  = h('input', { type: 'number', className: 'extra-input extra-input-amt', placeholder: 'Suma', step: '0.01', min: '0' });
-    const dayIn  = h('input', { type: 'number', className: 'extra-input extra-input-day', placeholder: 'Deň', min: '1', max: '31', value: now.getDate() });
+  const updateTypeToggle = () => {
+    btnIncome.className = 'entry-type-btn' + (entryType === 'income' ? ' active-income' : '');
+    btnExpense.className = 'entry-type-btn' + (entryType === 'expense' ? ' active-expense' : '');
+  };
+  updateTypeToggle();
 
-    const save = h('button', { className: 'extra-save-btn', style: 'padding:5px 14px;' }, ['Pridať']);
-    save.onclick = () => {
-      const amt = parseFloat(amtIn.value);
-      const day = parseInt(dayIn.value);
-      if (!amt || amt <= 0) { amtIn.focus(); return; }
+  btnIncome.onclick = () => { entryType = 'income'; updateTypeToggle(); };
+  btnExpense.onclick = () => { entryType = 'expense'; updateTypeToggle(); };
+  typeToggle.append(btnIncome, btnExpense);
+  card.appendChild(typeToggle);
+
+  // Fields
+  const fields = h('div', { className: 'entry-form-fields' });
+  const nameIn = h('input', { type: 'text', className: 'entry-field', placeholder: 'Názov' });
+  const amtIn  = h('input', { type: 'number', className: 'entry-field', placeholder: 'Suma', step: '0.01', min: '0' });
+  const dayIn  = h('input', { type: 'number', className: 'entry-field', placeholder: 'Deň', min: '1', max: '31', value: now.getDate() });
+  fields.append(nameIn, amtIn, dayIn);
+  card.appendChild(fields);
+
+  // Recurring toggle
+  const recRow = h('label', { className: 'entry-recurring-row' });
+  const recChk = h('input', { type: 'checkbox' });
+  recRow.append(recChk, document.createTextNode('Opakovať každý mesiac (pravidelný)'));
+  card.appendChild(recRow);
+
+  // Actions
+  const actions = h('div', { className: 'entry-form-actions' });
+  const saveBtn = h('button', { className: 'entry-save-btn' }, ['Pridať']);
+  saveBtn.onclick = () => {
+    const amt = parseFloat(amtIn.value);
+    const day = parseInt(dayIn.value) || 1;
+    const name = nameIn.value.trim() || (entryType === 'income' ? 'Príjem' : 'Výdavok');
+    if (!amt || amt <= 0) { amtIn.focus(); return; }
+    const startYM = mkey(viewYear, viewMonth);
+    const id = (entryType === 'income' ? 'ri_' : 're_') + Date.now();
+
+    if (recChk.checked) {
+      if (entryType === 'income') {
+        if (!state.recurringIncomes) state.recurringIncomes = [];
+        state.recurringIncomes.push({ id, name, amount: amt, day, startYM });
+      } else {
+        if (!state.recurringExpenses) state.recurringExpenses = [];
+        state.recurringExpenses.push({ id, name, amount: amt, day, startYM });
+      }
+    } else {
       const k = mkey(viewYear, viewMonth);
-      if (!state.customExpenses[k]) state.customExpenses[k] = [];
-      state.customExpenses[k].push({ id: 'naklad_' + Date.now(), name: nameIn.value.trim() || 'Náklad', amount: amt, day: day || 1 });
-      showNakladForm = false; saveState(); render();
-    };
-    const cancel = h('button', { className: 'extra-cancel-btn' }, ['Zrušiť']);
-    cancel.onclick = () => { showNakladForm = false; renderContent(); };
+      if (entryType === 'income') {
+        if (!state.extraIncomes[k]) state.extraIncomes[k] = [];
+        state.extraIncomes[k].push({ id, name, amount: amt, day });
+      } else {
+        if (!state.customExpenses[k]) state.customExpenses[k] = [];
+        state.customExpenses[k].push({ id, name, amount: amt, day });
+      }
+    }
+    showEntryForm = false;
+    saveState(); render();
+  };
 
-    form.append(nameIn, amtIn, dayIn, save, cancel);
-    wrap.appendChild(form);
-    setTimeout(() => nameIn.focus(), 10);
-  } else {
-    const btn = h('button', { className: 'add-extra-btn', style: 'width:auto;padding:7px 14px;' });
-    btn.innerHTML = icon('check', 13).replace('check','x').replace('M20 6 9 17l-5-5','M12 5v14M5 12h14') + '<span>Pridať náklad</span>';
-    btn.querySelector('svg').style.cssText = 'opacity:0.6;';
-    btn.onclick = () => { showNakladForm = true; renderContent(); };
-    wrap.appendChild(btn);
-  }
+  const cancelBtn = h('button', { className: 'entry-cancel-btn' }, ['Zrušiť']);
+  cancelBtn.onclick = () => { showEntryForm = false; renderContent(); };
 
-  return wrap;
+  actions.append(saveBtn, cancelBtn);
+  card.appendChild(actions);
+  setTimeout(() => nameIn.focus(), 10);
+  return card;
 }
 
 function renderListRow(ev) {
@@ -1781,6 +2042,15 @@ function renderZostatok() {
   toggle.appendChild(btnMonth);
   toggle.appendChild(btnPayday);
   wrap.appendChild(toggle);
+
+  // Add income/expense button
+  if (showEntryForm && entryFormContext === 'zostatok') {
+    wrap.appendChild(renderEntryForm('zostatok'));
+  } else {
+    const fab = h('button', { className: 'add-entry-fab', onclick: () => { showEntryForm = true; entryFormContext = 'zostatok'; renderContent(); } });
+    fab.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Pridať príjem / výdavok</span>';
+    wrap.appendChild(fab);
+  }
 
   const todayDay = now.getDate();
   const todayMonth = now.getMonth() + 1;
@@ -1951,6 +2221,156 @@ function renderZostatok() {
   }
 
   return wrap;
+}
+
+// ═══════════════════════════════════════════════════════
+
+function renderFaktury() {
+  const wrap = h('div');
+
+  // Add invoice button / form
+  if (showInvForm) {
+    const form = h('div', { className: 'inv-add-form' });
+    form.appendChild(h('div', { className: 'entry-form-title' }, ['Nová faktúra']));
+
+    const grid = h('div', { className: 'inv-form-grid' });
+    const nameIn    = h('input', { type: 'text',   className: 'entry-field', placeholder: 'Názov / číslo faktúry' });
+    const clientIn  = h('input', { type: 'text',   className: 'entry-field', placeholder: 'Klient' });
+    const issuedIn  = h('input', { type: 'date',   className: 'entry-field', value: now.toISOString().slice(0,10) });
+    const dueIn     = h('input', { type: 'date',   className: 'entry-field' });
+    const amtIn     = h('input', { type: 'number', className: 'entry-field', placeholder: 'Suma €', step: '0.01', min: '0' });
+    grid.append(nameIn, clientIn, issuedIn, dueIn, amtIn);
+    form.appendChild(grid);
+
+    const actions = h('div', { className: 'entry-form-actions' });
+    const saveBtn = h('button', { className: 'entry-save-btn' }, ['Uložiť faktúru']);
+    saveBtn.onclick = () => {
+      const name = nameIn.value.trim();
+      const amt  = parseFloat(amtIn.value);
+      if (!name) { nameIn.focus(); return; }
+      if (!amt || amt <= 0) { amtIn.focus(); return; }
+      if (!state.invoices) state.invoices = [];
+      state.invoices.push({
+        id: 'inv_' + Date.now(),
+        name,
+        client: clientIn.value.trim(),
+        issueDate: issuedIn.value,
+        dueDate: dueIn.value,
+        amount: amt,
+        paid: false,
+      });
+      showInvForm = false;
+      saveState(); renderContent();
+    };
+    const cancelBtn = h('button', { className: 'entry-cancel-btn' }, ['Zrušiť']);
+    cancelBtn.onclick = () => { showInvForm = false; renderContent(); };
+    actions.append(saveBtn, cancelBtn);
+    form.appendChild(actions);
+    wrap.appendChild(form);
+    setTimeout(() => nameIn.focus(), 10);
+  } else {
+    const addBtn = h('button', { className: 'add-entry-fab', onclick: () => { showInvForm = true; renderContent(); } });
+    addBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Pridať faktúru</span>';
+    wrap.appendChild(addBtn);
+  }
+
+  const invoices = state.invoices || [];
+  const todayStr = now.toISOString().slice(0, 10);
+
+  // Summary stats
+  const unpaid = invoices.filter(i => !i.paid);
+  const totalUnpaid = unpaid.reduce((s, i) => s + i.amount, 0);
+  const overdue = unpaid.filter(i => i.dueDate && i.dueDate < todayStr);
+
+  if (unpaid.length > 0) {
+    const statsRow = h('div', { style: 'display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;' });
+    const mkStat = (label, val, color) => {
+      const card = h('div', { style: `flex:1;min-width:120px;background:var(--card);border:0.5px solid var(--border);border-radius:var(--r-card);padding:12px 16px;` });
+      card.appendChild(h('div', { style: 'font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-3);margin-bottom:4px;' }, [label]));
+      card.appendChild(h('div', { style: `font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:${color};` }, [val]));
+      return card;
+    };
+    statsRow.appendChild(mkStat('Nezaplatené', unpaid.length + ' faktúr', 'var(--text)'));
+    statsRow.appendChild(mkStat('Čaká na platbu', fmt(totalUnpaid), 'var(--green)'));
+    if (overdue.length > 0) statsRow.appendChild(mkStat('Po splatnosti', overdue.length + ' faktúr', 'var(--red)'));
+    wrap.appendChild(statsRow);
+  }
+
+  if (invoices.length === 0) {
+    wrap.appendChild(h('div', { className: 'no-items', style: 'margin-top:8px;' }, ['Žiadne faktúry. Pridaj prvú faktúru.']));
+    return wrap;
+  }
+
+  // Sort: overdue first, then by due date, paid last
+  const sorted = [...invoices].sort((a, b) => {
+    if (a.paid !== b.paid) return a.paid ? 1 : -1;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+
+  const card = h('div', { className: 'inv-card' });
+
+  // Table header
+  const hdr = h('div', { className: 'inv-row', style: 'background:var(--bg);' });
+  ['Faktúra', 'Vystavená', 'Splatnosť', 'Suma', ''].forEach(t => {
+    hdr.appendChild(h('div', { className: 'inv-th' }, [t]));
+  });
+  card.appendChild(hdr);
+
+  sorted.forEach(inv => {
+    const isOverdue = !inv.paid && inv.dueDate && inv.dueDate < todayStr;
+    const isSoon = !inv.paid && !isOverdue && inv.dueDate && inv.dueDate <= new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7).toISOString().slice(0,10);
+
+    const cls = 'inv-row' + (inv.paid ? ' inv-paid' : isOverdue ? ' inv-overdue' : isSoon ? ' inv-soon' : '');
+    const row = h('div', { className: cls });
+
+    // Name + client + status
+    const nameWrap = h('div');
+    nameWrap.appendChild(h('div', { className: 'inv-name' }, [inv.name]));
+    if (inv.client) nameWrap.appendChild(h('div', { className: 'inv-client' }, [inv.client]));
+    const statusTag = h('span', { className: 'inv-status-tag ' + (inv.paid ? 'inv-status-paid' : isOverdue ? 'inv-status-overdue' : isSoon ? 'inv-status-soon' : 'inv-status-open') },
+      [inv.paid ? 'Zaplatená' : isOverdue ? 'Po splatnosti' : isSoon ? 'Čoskoro' : 'Otvorená']);
+    nameWrap.appendChild(statusTag);
+    row.appendChild(nameWrap);
+
+    // Issue date
+    row.appendChild(h('div', { className: 'inv-date' }, [inv.issueDate ? formatDate(inv.issueDate) : '—']));
+
+    // Due date
+    const dueEl = h('div', { className: 'inv-due' });
+    dueEl.textContent = inv.dueDate ? formatDate(inv.dueDate) : '—';
+    row.appendChild(dueEl);
+
+    // Amount
+    row.appendChild(h('div', { className: 'inv-amount' + (inv.paid ? ' paid' : '') }, [fmt(inv.amount)]));
+
+    // Controls
+    const ctrl = h('div', { className: 'inv-ctrl' });
+
+    const paidBtn = h('button', { className: 'ctrl-btn' + (inv.paid ? ' paid' : ''), title: inv.paid ? 'Označiť ako nezaplatenú' : 'Označiť ako zaplatenú' });
+    paidBtn.innerHTML = icon('check', 13);
+    paidBtn.style.opacity = inv.paid ? '1' : '0.3';
+    paidBtn.onclick = () => { inv.paid = !inv.paid; saveState(); renderContent(); };
+    ctrl.appendChild(paidBtn);
+
+    const delBtn = h('button', { className: 'ctrl-btn', title: 'Odstrániť' });
+    delBtn.innerHTML = icon('x', 13);
+    delBtn.onclick = () => { state.invoices = state.invoices.filter(i => i.id !== inv.id); saveState(); renderContent(); };
+    ctrl.appendChild(delBtn);
+
+    row.appendChild(ctrl);
+    card.appendChild(row);
+  });
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const [y, m, d] = dateStr.split('-');
+  return d + '.' + m + '.' + y;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2281,6 +2701,7 @@ function renderMobileNav() {
   const items = [
     { id: 'platby',    label: 'Kalendár', ico: 'calendar' },
     { id: 'zostatok',  label: 'Zostatok', ico: 'wallet' },
+    { id: 'faktury',   label: 'Faktúry',  ico: 'bell' },
     { id: 'domeny',    label: 'Domény',   ico: 'globe' },
     { id: 'projekcia', label: 'Projekcia',ico: 'trending' },
   ];
