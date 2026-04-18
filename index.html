@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financie</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F8FAF8;
+      --sidebar: #ECEEED;
+      --card: #FFFFFF;
+      --border: #DDE2DD;
+      --text: #0D0F0D;
+      --text-2: #2C2F2C;
+      --text-3: #454A45;
+      --green: #3D7A4F;
+      --green-hover: #2F6040;
+      --green-light: #EBF3EE;
+      --green-mid: #C5DCC9;
+      --red: #C0392B;
+      --red-light: #FDECEA;
+      --blue: #2563EB;
+      --blue-light: #EFF6FF;
+      --orange: #C2440A;
+      --orange-light: #FFF4EE;
+      --violet: #6D28D9;
+      --violet-light: #F5F3FF;
+      --sky: #0369A1;
+      --sky-light: #F0F9FF;
+      --r-card: 14px;
+      --r-nav: 8px;
+      --r-pill: 999px;
+      --sidebar-w: 240px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--sidebar);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sb-top {
+      padding: 20px 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sb-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.1px;
+      padding: 0 4px;
+    }
+
+    /* month nav */
+    .sb-month {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      padding: 8px 10px;
+    }
+
+    .sb-month-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+
+    .month-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-3);
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      border-radius: 6px;
+      transition: color 0.12s, background 0.12s;
+    }
+
+    .month-btn:hover { color: var(--text); background: var(--border); }
+
+    /* stats */
+    .sb-stats {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      overflow: hidden;
+    }
+
+    .sb-stat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .sb-stat:last-child { border-bottom: none; }
+
+    .sb-stat-label { font-size: 12px; color: var(--text-2); }
+
+    .sb-stat-val {
+      font-size: 12px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.2px;
+    }
+
+    .val-green { color: var(--green); }
+    .val-red { color: var(--red); }
+    .val-bold { color: var(--text); }
+
+    /* nav */
+    .sb-nav {
+      padding: 16px 10px 8px;
+      flex: 1;
+    }
+
+    .sb-nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-3);
+      padding: 0 6px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--r-nav);
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 400;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.12s, color 0.12s;
+      border-left: 2px solid transparent;
+      font-family: inherit;
+    }
+
+    .nav-item:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+
+    .nav-item.active {
+      color: var(--green);
+      border-left-color: var(--green);
+      background: var(--green-light);
+      font-weight: 500;
+    }
+
+    .nav-item svg { flex-shrink: 0; }
+
+    /* mini trend bars */
+    .sb-trend {
+      padding: 0 10px 6px;
+    }
+
+    .sb-trend-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-3);
+      padding: 0 6px;
+      margin-bottom: 8px;
+    }
+
+    .mini-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 36px;
+      padding: 0 2px;
+    }
+
+    .mini-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .mini-bar { width: 100%; border-radius: 2px 2px 0 0; min-height: 2px; }
+    .mini-bar-lbl { font-size: 9px; color: var(--text-3); }
+
+    /* balance */
+    .sb-bottom {
+      padding: 12px 16px 24px;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .sb-bottom-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .bal-input {
+      width: 100%;
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-nav);
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      font-variant-numeric: tabular-nums;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.12s;
+    }
+
+    .bal-input:focus { border-color: var(--green); }
+
+    /* ── MAIN ── */
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 28px 36px 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .page-subtitle {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 2px;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-nav);
+      padding: 3px;
+    }
+
+    .view-toggle-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px 8px;
+      border-radius: 6px;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.12s;
+    }
+
+    .view-toggle-btn:hover { color: var(--text); }
+
+    .view-toggle-btn.active {
+      background: var(--green-light);
+      color: var(--green);
+    }
+
+    /* ── CONTENT ── */
+    .content { padding: 0 36px 60px; flex: 1; }
+
+    /* ── CALENDAR VIEW ── */
+    .cal-grid-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      margin-bottom: 1px;
+    }
+
+    .cal-weekday {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 8px 0;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      background: transparent;
+    }
+
+    .cal-cell {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-nav);
+      padding: 7px 8px 6px;
+      min-height: 80px;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .cal-cell:hover { border-color: var(--green-mid); }
+    .cal-cell.empty { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+    .cal-cell.is-today { background: var(--green-light); border-color: var(--green-mid); }
+    .cal-cell.is-past { opacity: 0.55; }
+    .cal-cell.is-selected { border-color: var(--green); box-shadow: 0 0 0 1px var(--green); }
+
+    .cal-day-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      line-height: 1;
+      margin-bottom: 1px;
+    }
+
+    .cal-cell.is-today .cal-day-num { color: var(--green); }
+    .cal-cell.is-selected .cal-day-num { color: var(--green); }
+
+    .cal-event-pill {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 5px;
+      border-radius: var(--r-pill);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      line-height: 1.6;
+    }
+
+    .cal-event-more {
+      font-size: 10px;
+      color: var(--text-3);
+      padding: 0 2px;
+    }
+
+    .ev-income { background: var(--green-light); color: var(--green); }
+    .ev-auto { background: var(--blue-light); color: var(--blue); }
+    .ev-manual { background: var(--orange-light); color: var(--orange); }
+    .ev-tax { background: var(--red-light); color: var(--red); }
+    .ev-reminder { background: var(--sky-light); color: var(--sky); }
+    .ev-domain { background: var(--violet-light); color: var(--violet); }
+
+    /* selected day detail */
+    .cal-detail {
+      margin-top: 16px;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      overflow: hidden;
+    }
+
+    .cal-detail-header {
+      padding: 12px 16px;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .cal-detail-empty {
+      padding: 16px;
+      font-size: 12px;
+      color: var(--text-3);
+      text-align: center;
+    }
+
+    /* ── LIST VIEW ── */
+    .list-table { width: 100%; }
+
+    .list-header {
+      display: grid;
+      grid-template-columns: 36px 1fr 110px 72px;
+      gap: 8px;
+      padding: 0 10px 8px;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 2px;
+    }
+
+    .list-th {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-3);
+    }
+
+    .list-th.right { text-align: right; }
+
+    .list-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 110px 72px;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: var(--r-nav);
+      align-items: center;
+      border: 0.5px solid transparent;
+      transition: background 0.1s, border-color 0.1s;
+    }
+
+    .list-row:hover { background: rgba(255,255,255,0.8); border-color: var(--border); }
+    .list-row.income-row { background: var(--green-light); border-color: var(--green-mid); }
+    .list-row.income-row:hover { background: #DFF0E4; }
+    .list-row.is-today-row { background: #FEFCE8; border-color: #FDE68A; }
+    .list-row.is-past { opacity: 0.5; }
+    .list-row.is-paid .row-name { color: var(--text-3); }
+    .list-row.is-paid .row-amount { color: var(--text-3); }
+    .list-row.is-cancelled { opacity: 0.3; }
+    .list-row.is-cancelled .row-name { text-decoration: line-through; }
+
+    .row-day {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .row-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+
+    .row-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .row-note {
+      font-size: 11px;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+
+    .row-amount {
+      font-size: 13px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .row-amount.income { color: var(--green); }
+    .row-amount.expense { color: var(--text); }
+    .row-amount.editable { cursor: pointer; border-bottom: 0.5px dashed var(--border); }
+    .row-amount.editable:hover { border-bottom-color: var(--text-2); }
+
+    .row-ctrl { display: flex; gap: 3px; justify-content: flex-end; align-items: center; }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      color: var(--text-3);
+      transition: color 0.12s, background 0.12s;
+      font-size: 12px;
+    }
+
+    .ctrl-btn:hover { color: var(--text); background: rgba(0,0,0,0.06); }
+    .ctrl-btn.paid { color: var(--green); }
+    .ctrl-btn.cancelled { color: var(--red); }
+
+    .list-total-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 110px 72px;
+      gap: 8px;
+      padding: 12px 10px 0;
+      margin-top: 4px;
+      border-top: 0.5px solid var(--border);
+    }
+
+    .total-label { grid-column: 1/3; font-size: 12px; font-weight: 600; color: var(--text-2); text-align: right; }
+    .total-val { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+
+    /* ── PILLS / TAGS ── */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: var(--r-pill);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tag-auto { background: var(--blue-light); color: var(--blue); }
+    .tag-manual { background: var(--orange-light); color: var(--orange); }
+    .tag-tax { background: var(--red-light); color: var(--red); }
+    .tag-income { background: var(--green-light); color: var(--green); }
+    .tag-reminder { background: var(--sky-light); color: var(--sky); }
+    .tag-domain { background: var(--violet-light); color: var(--violet); }
+
+    /* ── INLINE EDIT ── */
+    .inline-input {
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      font-variant-numeric: tabular-nums;
+      border: 0.5px solid var(--green);
+      border-radius: 6px;
+      padding: 2px 7px;
+      width: 105px;
+      text-align: right;
+      outline: none;
+      background: var(--card);
+      color: var(--text);
+    }
+
+    /* ── DOMAINS TAB ── */
+    .domain-section { margin-bottom: 28px; }
+
+    .section-heading {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-3);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-heading-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .domain-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      overflow: hidden;
+    }
+
+    .domain-row {
+      display: grid;
+      grid-template-columns: 32px 1fr auto 32px;
+      gap: 10px;
+      padding: 9px 14px;
+      border-bottom: 0.5px solid var(--border);
+      align-items: center;
+      transition: background 0.1s;
+    }
+
+    .domain-row:hover { background: var(--bg); }
+    .domain-row:last-child { border-bottom: none; }
+    .domain-row.cancelled { opacity: 0.35; }
+
+    .dom-day { font-size: 12px; font-weight: 600; color: var(--text-3); text-align: right; font-variant-numeric: tabular-nums; }
+    .dom-name { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .dom-amount { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+    .dom-ctrl { display: flex; justify-content: flex-end; }
+
+    .no-items {
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-3);
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+    }
+
+    .group-month-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      padding: 16px 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .group-month-total { font-size: 12px; font-weight: 700; color: var(--text); }
+
+    /* ── PROJEKCIA ── */
+    .chart-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      padding: 20px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .trend-svg { width: 100%; min-width: 460px; height: 200px; display: block; }
+
+    .proj-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+      overflow: hidden;
+    }
+
+    .proj-table th {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-3);
+      padding: 10px 14px;
+      text-align: right;
+      border-bottom: 0.5px solid var(--border);
+      background: var(--bg);
+    }
+
+    .proj-table th:first-child { text-align: left; }
+
+    .proj-table td {
+      padding: 10px 14px;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .proj-table td:first-child { text-align: left; font-weight: 500; }
+    .proj-table tr:last-child td { border-bottom: none; }
+    .proj-table tr.highlight td { background: var(--green-light); }
+    .proj-table tr.highlight td:first-child { border-left: 2px solid var(--green); padding-left: 12px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .page-header { padding: 20px 16px 0; }
+      .content { padding: 0 16px 60px; }
+    }
+
+    .today-btn-sm {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-3);
+      background: none;
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-pill);
+      padding: 3px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+
+    .today-btn-sm:hover { color: var(--green); border-color: var(--green); }
+
+    /* ── EXTRA INCOME ── */
+    .extra-income-section { margin-top: 10px; }
+    .extra-income-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-3); margin-bottom: 6px; }
+    .extra-income-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+    .extra-income-row {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: var(--r-nav); padding: 6px 10px;
+    }
+    .extra-income-name { flex: 1; font-size: 12px; font-weight: 500; color: var(--text); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .extra-income-amt { font-size: 12px; font-weight: 600; color: var(--green); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .extra-income-del { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 13px; padding: 1px 3px; border-radius: 4px; transition: color 0.12s; line-height: 1; flex-shrink: 0; }
+    .extra-income-del:hover { color: var(--red); }
+    .add-extra-btn {
+      display: flex; align-items: center; gap: 6px; width: 100%;
+      background: none; border: 0.5px dashed var(--border);
+      border-radius: var(--r-nav); padding: 7px 10px;
+      font-size: 12px; font-weight: 500; color: var(--text-3);
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+    }
+    .add-extra-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
+    .extra-income-form {
+      display: flex; flex-direction: column; gap: 5px;
+      background: var(--card); border: 0.5px solid var(--green);
+      border-radius: var(--r-nav); padding: 9px 10px;
+    }
+    .extra-form-row { display: flex; gap: 5px; }
+    .extra-input {
+      border: 0.5px solid var(--border); border-radius: 6px;
+      padding: 5px 8px; font-size: 12px; font-family: inherit;
+      background: var(--bg); color: var(--text); outline: none;
+      transition: border-color 0.12s;
+    }
+    .extra-input:focus { border-color: var(--green); }
+    .extra-input-name { flex: 1; }
+    .extra-input-amt { width: 72px; font-variant-numeric: tabular-nums; }
+    .extra-input-day { width: 52px; font-variant-numeric: tabular-nums; }
+    .extra-form-actions { display: flex; gap: 4px; }
+    .extra-save-btn {
+      flex: 1; background: var(--green); color: #fff; border: none;
+      border-radius: 6px; padding: 5px 8px; font-size: 12px;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: background 0.12s;
+    }
+    .extra-save-btn:hover { background: var(--green-hover); }
+    .extra-cancel-btn {
+      background: none; border: 0.5px solid var(--border); border-radius: 6px;
+      padding: 5px 8px; font-size: 12px; cursor: pointer; color: var(--text-2);
+      font-family: inherit; transition: all 0.12s;
+    }
+    .extra-cancel-btn:hover { border-color: var(--text-2); }
+
+    /* ── ZOSTATOK SECTION ── */
+    .zost-input-card {
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: var(--r-card); padding: 20px 24px; margin-bottom: 20px;
+    }
+    .zost-input-row { display: flex; align-items: center; gap: 12px; }
+    .zost-input-label { font-size: 13px; font-weight: 500; color: var(--text-2); flex: 1; }
+    .zost-amount-input {
+      border: 0.5px solid var(--border); border-radius: var(--r-nav);
+      padding: 8px 12px; font-size: 18px; font-weight: 700;
+      font-family: inherit; font-variant-numeric: tabular-nums;
+      width: 180px; text-align: right; outline: none;
+      background: var(--bg); color: var(--text);
+      transition: border-color 0.12s;
+    }
+    .zost-amount-input:focus { border-color: var(--green); }
+    .zost-currency { font-size: 16px; font-weight: 600; color: var(--text-2); }
+    .zost-date-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+
+    .zost-toggle {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: var(--r-card); padding: 4px; width: fit-content;
+    }
+    .zost-toggle-btn {
+      padding: 8px 18px; border-radius: 10px; border: none;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      font-family: inherit; color: var(--text-2); background: none;
+      transition: all 0.15s;
+    }
+    .zost-toggle-btn.active { background: var(--green); color: #fff; }
+    .zost-toggle-btn:not(.active):hover { background: var(--bg); color: var(--text); }
+
+    .zost-timeline {
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: var(--r-card); overflow: hidden; margin-bottom: 16px;
+    }
+    .zost-tl-header {
+      padding: 12px 20px; border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .zost-tl-header-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+    .zost-tl-header-balance { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .zost-row {
+      display: grid; grid-template-columns: 36px 1fr auto auto;
+      gap: 10px; padding: 10px 20px; border-bottom: 0.5px solid var(--border);
+      align-items: center;
+    }
+    .zost-row:last-child { border-bottom: none; }
+    .zost-row.zost-income { background: var(--green-light); }
+    .zost-row.zost-separator { background: var(--bg); }
+
+    .zost-day { font-size: 12px; font-weight: 600; color: var(--text-3); text-align: right; font-variant-numeric: tabular-nums; }
+    .zost-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+    .zost-expense { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+    .zost-expense.neg { color: var(--red); }
+    .zost-expense.pos { color: var(--green); }
+    .zost-running { font-size: 12px; font-variant-numeric: tabular-nums; text-align: right; color: var(--text-3); white-space: nowrap; }
+
+    .zost-result-card {
+      background: var(--green); border-radius: var(--r-card);
+      padding: 20px 24px; color: #fff;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .zost-result-card.negative { background: var(--red); }
+    .zost-result-label { font-size: 13px; font-weight: 500; opacity: 0.85; }
+    .zost-result-amount { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; font-variant-numeric: tabular-nums; }
+    .zost-result-date { font-size: 11px; opacity: 0.75; margin-top: 3px; }
+
+    .zost-no-balance {
+      text-align: center; padding: 48px 20px;
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: var(--r-card);
+    }
+    .zost-no-balance-icon { font-size: 32px; margin-bottom: 12px; }
+    .zost-no-balance-text { font-size: 14px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+    .zost-no-balance-sub { font-size: 12px; color: var(--text-3); }
+
+    /* ── REMINDER ROW STYLE ── */
+    .list-row.reminder-row {
+      border-left: 2px solid var(--sky);
+      background: var(--sky-light);
+    }
+    .list-row.reminder-row:hover { background: #E1F4FD; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main">
+    <div class="page-header" id="page-header"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// ICONS
+// ═══════════════════════════════════════════════════════
+
+function icon(name, size = 16) {
+  const p = {
+    calendar:   `<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>`,
+    globe:      `<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>`,
+    trending:   `<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>`,
+    grid:       `<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>`,
+    list:       `<line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/>`,
+    chevLeft:   `<path d="m15 18-6-6 6-6"/>`,
+    chevRight:  `<path d="m9 18 6-6-6-6"/>`,
+    check:      `<path d="M20 6 9 17l-5-5"/>`,
+    x:          `<path d="M18 6 6 18M6 6l12 12"/>`,
+    undo:       `<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>`,
+    wallet:     `<path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>`,
+    bell:       `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>`,
+  };
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${p[name] || ''}</svg>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
+const DEFAULT_INCOME = 2853.76;
+const INCOME_DAY = 8;
+const DEFAULT_DPH = 533;
+const SK_MONTHS = ['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'];
+const SK_MONTHS_S = ['Jan','Feb','Mar','Apr','Máj','Jún','Júl','Aug','Sep','Okt','Nov','Dec'];
+const SK_WEEKDAYS = ['Po','Ut','St','Št','Pi','So','Ne'];
+
+const FIXED_EXPENSES = [
+  { id: 'uctovnictvo', name: 'Účtovníctvo',         amount: 184.50, marchAmount: 369, day: 1,  payType: 'manual',   category: 'service',  note: 'Odoslať 1. · splatnosť 15.' },
+  { id: 'rem_invoice', name: 'Vystaviť faktúru',                                       day: 1,  payType: 'reminder', category: 'reminder', isReminder: true },
+  { id: 'rem_docs',    name: 'Poslať doklady účtovníčke',                              day: 1,  payType: 'reminder', category: 'reminder', isReminder: true },
+  { id: 'doklado',     name: 'Doklado',              amount: 12.18,                    day: 2,  payType: 'auto',     category: 'software' },
+  { id: 'ff_andy',     name: 'Form Factory – Andy',  amount: 49,                       day: 3,  payType: 'manual',   category: 'fitness',  note: 'Zaplatiť Andy' },
+  { id: 'odvody',      name: 'Odvody',               amount: 180.20,                   day: 6,  payType: 'manual',   category: 'tax' },
+  { id: 'ff_natka',    name: 'Form Factory – Natka', amount: 49,                       day: 17, payType: 'manual',   category: 'fitness',  note: 'Zaplatiť Natka' },
+  { id: 'figma',       name: 'Figma',                amount: 20,                       day: 20, payType: 'auto',     category: 'software' },
+  { id: 'dph',         name: 'DPH',                  amount: DEFAULT_DPH,              day: 24, payType: 'manual',   category: 'tax',      variable: true },
+  { id: 'mzdy',        name: 'Tabuľa – mzdy',        amount: 34,                       day: 26, payType: 'manual',   category: 'service',  note: 'Splatnosť 1. nasl. mesiaca' },
+  { id: 'ff_semi',     name: 'Form Factory Polročné', amount: 40.52,                   day: 23, payType: 'auto',     category: 'fitness',  startDate: '2026-08-23', frequency: 'semiannual', note: 'Polročné · od aug 2026' },
+  { id: 'shopify',     name: 'Shopify',              amount: 32,                       day: 30, payType: 'auto',     category: 'software' },
+];
+
+const DOMAINS = [
+  { id: 'dom_sportqo_com_email',  name: 'sportqo.com',           dtype: 'email',   renewDate: '2026-05-16', amount: 30.12 },
+  { id: 'dom_hockeybakery_email', name: 'hockeybakery.com',      dtype: 'email',   renewDate: '2026-06-01', amount: 30.12 },
+  { id: 'dom_andreakollova_h',    name: 'andreakollova.com',      dtype: 'hosting', renewDate: '2026-06-08', amount: 48.01 },
+  { id: 'dom_andreakollova_com',  name: 'andreakollova.com',      dtype: 'doména',  renewDate: '2026-06-09', amount: 16.90 },
+  { id: 'dom_sportqo_pl',         name: 'sportqo.pl',             dtype: 'doména',  renewDate: '2026-06-17', amount: 16.90 },
+  { id: 'dom_sportqo_at',         name: 'sportqo.at',             dtype: 'doména',  renewDate: '2026-06-17', amount: 16.90 },
+  { id: 'dom_sportqo_hu',         name: 'sportqo.hu',             dtype: 'doména',  renewDate: '2026-06-18', amount: 16.90 },
+  { id: 'dom_sportqo_com',        name: 'sportqo.com',            dtype: 'doména',  renewDate: '2026-07-23', amount: 16.90 },
+  { id: 'dom_sportovetreningy',   name: 'sportovetreningy.sk',    dtype: 'doména',  renewDate: '2026-08-13', amount: 16.90 },
+  { id: 'dom_hockeyschool_sk',    name: 'hockeyschool.sk',        dtype: 'doména',  renewDate: '2026-08-13', amount: 16.90 },
+  { id: 'dom_katarinavadasz_sk',  name: 'katarinavadasz.sk',      dtype: 'doména',  renewDate: '2026-08-24', amount: 16.90 },
+  { id: 'dom_katarinavadasz_em',  name: 'katarinavadasz.sk',      dtype: 'email',   renewDate: '2026-09-10', amount: 30.12 },
+  { id: 'dom_antiksmartcity_sk',  name: 'antiksmartcity.sk',      dtype: 'doména',  renewDate: '2026-09-13', amount: 16.90 },
+  { id: 'dom_antiksmartcity_h',   name: 'antiksmartcity.sk',      dtype: 'hosting', renewDate: '2026-09-13', amount: 48.01 },
+  { id: 'dom_antikturizmus_sk',   name: 'antikturizmus.sk',       dtype: 'doména',  renewDate: '2026-09-16', amount: 16.90 },
+  { id: 'dom_antikturizmus_h',    name: 'antikturizmus.sk',       dtype: 'hosting', renewDate: '2026-09-16', amount: 48.01 },
+  { id: 'dom_melonbase_com',      name: 'melonbase.com',          dtype: 'doména',  renewDate: '2026-09-23', amount: 16.90 },
+  { id: 'dom_melonvest_com',      name: 'melonvest.com',          dtype: 'doména',  renewDate: '2026-09-23', amount: 16.90 },
+  { id: 'dom_tabelaconsulting',   name: 'tabelaconsulting.sk',    dtype: 'doména',  renewDate: '2026-10-09', amount: 16.90 },
+  { id: 'dom_tabelaconsulting_h', name: 'tabelaconsulting.sk',    dtype: 'hosting', renewDate: '2026-10-09', amount: 48.01 },
+  { id: 'dom_hockeybakery_com',   name: 'hockeybakery.com',       dtype: 'doména',  renewDate: '2026-10-12', amount: 16.90 },
+  { id: 'dom_pickleball_sk',      name: 'pickleballbratislava.sk',dtype: 'doména',  renewDate: '2026-10-12', amount: 16.90 },
+  { id: 'dom_nabijacky_sk',       name: 'nabijackyobcanom.sk',    dtype: 'doména',  renewDate: '2026-11-08', amount: 16.90 },
+  { id: 'dom_drilzz_com',         name: 'drilzz.com',             dtype: 'doména',  renewDate: '2026-11-24', amount: 16.90 },
+  { id: 'dom_pozemnyhokej_sk',    name: 'pozemnyhokej.sk',        dtype: 'doména',  renewDate: '2026-11-24', amount: 16.90 },
+  { id: 'dom_denno_sk',           name: 'denno.sk',               dtype: 'doména',  renewDate: '2026-12-01', amount: 16.90 },
+  { id: 'dom_anjelskyobchod_d',   name: 'anjelskyobchod.sk',      dtype: 'doména',  renewDate: '2026-12-07', amount: 16.90 },
+  { id: 'dom_ahrefpeople_com',    name: 'ahrefpeople.com',        dtype: 'doména',  renewDate: '2026-12-10', amount: 16.90 },
+  { id: 'dom_andreakollova_sk',   name: 'andreakollova.sk',       dtype: 'doména',  renewDate: '2026-12-15', amount: 16.90 },
+  { id: 'dom_baddiecodes_com',    name: 'baddiecodes.com',        dtype: 'doména',  renewDate: '2027-01-17', amount: 16.90 },
+  { id: 'dom_devgurl_com',        name: 'devgurl.com',            dtype: 'doména',  renewDate: '2027-01-17', amount: 16.90 },
+  { id: 'dom_femmecodes_com',     name: 'femmecodes.com',         dtype: 'doména',  renewDate: '2027-01-17', amount: 16.90 },
+  { id: 'dom_femmedev_com',       name: 'femmedev.com',           dtype: 'doména',  renewDate: '2027-01-17', amount: 16.90 },
+  { id: 'dom_drixton_com',        name: 'drixton.com',            dtype: 'doména',  renewDate: '2027-01-20', amount: 16.90 },
+  { id: 'dom_drixton_com_h',      name: 'drixton.com',            dtype: 'hosting', renewDate: '2027-01-20', amount: 48.01 },
+  { id: 'dom_drixton_sk',         name: 'drixton.sk',             dtype: 'doména',  renewDate: '2027-01-20', amount: 16.90 },
+  { id: 'dom_kranioterapia_sk',   name: 'kranioterapia.sk',       dtype: 'doména',  renewDate: '2027-02-06', amount: 16.90 },
+  { id: 'dom_kranioterapia_h',    name: 'kranioterapia.sk',       dtype: 'hosting', renewDate: '2027-02-06', amount: 48.01 },
+  { id: 'dom_kerollajn_sk',       name: 'kerollajn-photo.sk',     dtype: 'doména',  renewDate: '2027-02-08', amount: 16.90 },
+  { id: 'dom_kerollajn_h',        name: 'kerollajn-photo.sk',     dtype: 'hosting', renewDate: '2027-02-08', amount: 48.01 },
+  { id: 'dom_fieldhockey_sk',     name: 'fieldhockey.sk',         dtype: 'doména',  renewDate: '2027-02-26', amount: 16.90 },
+  { id: 'dom_pozemak_sk',         name: 'pozemak.sk',             dtype: 'doména',  renewDate: '2027-02-26', amount: 16.90 },
+  { id: 'dom_sportko_sk',         name: 'sportko.sk',             dtype: 'doména',  renewDate: '2027-02-27', amount: 16.90 },
+  { id: 'dom_sportqo_cz',         name: 'sportqo.cz',             dtype: 'doména',  renewDate: '2027-02-27', amount: 16.90 },
+  { id: 'dom_sportqo_sk',         name: 'sportqo.sk',             dtype: 'doména',  renewDate: '2027-02-27', amount: 16.90 },
+  { id: 'dom_alustyl_sk',         name: 'alustyl.sk',             dtype: 'doména',  renewDate: '2027-03-16', amount: 16.90 },
+  { id: 'dom_alustyl_h',          name: 'alustyl.sk',             dtype: 'hosting', renewDate: '2027-03-16', amount: 48.01 },
+  { id: 'dom_hockeytea_com',      name: 'hockeytea.com',          dtype: 'doména',  renewDate: '2027-04-01', amount: 16.90 },
+  { id: 'dom_formulka_sk',        name: 'formulka.sk',            dtype: 'doména',  renewDate: '2027-04-01', amount: 16.90 },
+  { id: 'dom_hockeyrefresh_com',  name: 'hockeyrefresh.com',      dtype: 'doména',  renewDate: '2027-04-05', amount: 16.90 },
+  { id: 'dom_anjelskyobchod_em',  name: 'anjelskyobchod.sk',      dtype: 'email',   renewDate: '2027-04-14', amount: 30.12 },
+  { id: 'dom_fitqo_sk',           name: 'fitqo.sk',               dtype: 'doména',  renewDate: '2027-04-25', amount: 16.90 },
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+
+const STORAGE_KEY = 'drixton_finance_v3';
+
+function defaultState() {
+  return { startingBalance: 0, currentBalance: null, customIncome: {}, dphAmounts: {}, cancelledIds: [], paidIds: {}, extraIncomes: {} };
+}
+
+function loadState() {
+  try { const s = JSON.parse(localStorage.getItem(STORAGE_KEY)); return s ? { ...defaultState(), ...s } : defaultState(); }
+  catch { return defaultState(); }
+}
+
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+let state = loadState();
+const now = new Date();
+let viewYear = now.getFullYear();
+let viewMonth = now.getMonth() + 1;
+let activeSection = 'platby';
+let balanceView = 'month'; // 'month' | 'payday'
+let calView = true; // true = calendar, false = list
+let selectedDay = null;
+let showExtraForm = false;
+
+// ═══════════════════════════════════════════════════════
+// BUSINESS LOGIC
+// ═══════════════════════════════════════════════════════
+
+const mkey = (y, m) => `${y}-${String(m).padStart(2,'0')}`;
+
+function isSemiAnnual(exp, y, m) {
+  const [sy, sm] = exp.startDate.split('-').map(Number);
+  const diff = (y - sy) * 12 + (m - sm);
+  return diff >= 0 && diff % 6 === 0;
+}
+
+function getIncome(y, m) { return state.customIncome[mkey(y,m)] ?? DEFAULT_INCOME; }
+function getDph(y, m) { return state.dphAmounts[mkey(y,m)] ?? DEFAULT_DPH; }
+function getExtraIncomes(y, m) { return state.extraIncomes[mkey(y,m)] || []; }
+function getTotalIncome(y, m) { return getIncome(y, m) + getExtraIncomes(y, m).reduce((s, e) => s + e.amount, 0); }
+
+function getFixedForMonth(y, m) {
+  return FIXED_EXPENSES.filter(e => {
+    if (state.cancelledIds.includes(e.id)) return false;
+    if (e.frequency === 'semiannual') return isSemiAnnual(e, y, m);
+    return true;
+  }).map(e => {
+    let amount = e.amount;
+    if (e.id === 'uctovnictvo' && m === 3) amount = e.marchAmount;
+    if (e.variable) amount = getDph(y, m);
+    return { ...e, amount };
+  });
+}
+
+function getDomainsForMonth(y, m) {
+  return DOMAINS.filter(d => {
+    if (state.cancelledIds.includes(d.id)) return false;
+    const dt = new Date(d.renewDate);
+    return dt.getFullYear() === y && dt.getMonth() + 1 === m;
+  });
+}
+
+function getStats(y, m) {
+  const income = getTotalIncome(y, m);
+  const fixed = getFixedForMonth(y, m).filter(e => !e.isReminder);
+  const domains = getDomainsForMonth(y, m);
+  let expenses = fixed.reduce((s, e) => s + (e.amount || 0), 0) + domains.reduce((s, d) => s + d.amount, 0);
+  return { income, expenses, net: income - expenses };
+}
+
+function getProjection(count = 12) {
+  const res = [];
+  let bal = state.startingBalance;
+  let y = viewYear, m = viewMonth;
+  for (let i = 0; i < count; i++) {
+    const s = getStats(y, m);
+    bal += s.net;
+    res.push({ y, m, ...s, balance: bal });
+    if (++m > 12) { m = 1; y++; }
+  }
+  return res;
+}
+
+// Events for a specific day
+function getEventsForDay(y, m, day) {
+  const events = [];
+  if (day === INCOME_DAY) {
+    events.push({ id: 'income', name: 'Príjem', payType: 'income', amount: getIncome(y, m), isIncome: true, day });
+  }
+  getExtraIncomes(y, m).filter(e => e.day === day).forEach(e => events.push({ ...e, isIncome: true, payType: 'income', isExtra: true }));
+  getFixedForMonth(y, m).forEach(e => { if (e.day === day) events.push(e); });
+  getDomainsForMonth(y, m).forEach(d => { const dt = new Date(d.renewDate); if (dt.getDate() === day) events.push({ ...d, isDomain: true }); });
+  return events;
+}
+
+// All events for the month sorted by day
+function getAllEventsForMonth(y, m) {
+  const events = [];
+  events.push({ id: 'income', name: 'Príjem', payType: 'income', amount: getIncome(y, m), isIncome: true, day: INCOME_DAY });
+  getExtraIncomes(y, m).forEach(e => events.push({ ...e, isIncome: true, payType: 'income', isExtra: true }));
+  getFixedForMonth(y, m).forEach(e => events.push(e));
+  getDomainsForMonth(y, m).forEach(d => { const dt = new Date(d.renewDate); events.push({ ...d, isDomain: true, day: dt.getDate() }); });
+  events.sort((a, b) => (a.day || 0) - (b.day || 0));
+  return events;
+}
+
+const fmt = (v, sign = false) => {
+  if (v === null || v === undefined) return '—';
+  const s = new Intl.NumberFormat('sk-SK', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(v));
+  if (sign && v > 0) return '+' + s + ' €';
+  if (sign) return '−' + s + ' €';
+  return s + ' €';
+};
+
+function isPastDay(day) {
+  return viewYear === now.getFullYear() && viewMonth === now.getMonth() + 1 && day < now.getDate();
+}
+function isTodayDay(day) {
+  return viewYear === now.getFullYear() && viewMonth === now.getMonth() + 1 && day === now.getDate();
+}
+
+function evClass(ev) {
+  if (ev.isIncome) return 'ev-income';
+  if (ev.isReminder) return 'ev-reminder';
+  if (ev.isDomain) return 'ev-domain';
+  if (ev.category === 'tax') return 'ev-tax';
+  if (ev.payType === 'auto') return 'ev-auto';
+  return 'ev-manual';
+}
+
+function makeTag(ev) {
+  if (ev.isIncome) return mkTag('tag-income', 'príjem');
+  if (ev.isReminder || ev.payType === 'reminder') return mkTag('tag-reminder', 'úloha');
+  if (ev.isDomain) return mkTag('tag-domain', ev.dtype || 'doména');
+  if (ev.category === 'tax') return mkTag('tag-tax', ev.id === 'dph' ? 'DPH' : 'dane');
+  if (ev.payType === 'auto') return mkTag('tag-auto', 'auto');
+  return mkTag('tag-manual', 'manuálne');
+}
+
+function mkTag(cls, lbl) { return h('span', { className: 'tag ' + cls }, [lbl]); }
+
+// ═══════════════════════════════════════════════════════
+// RENDER – SIDEBAR
+// ═══════════════════════════════════════════════════════
+
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+
+  const top = h('div', { className: 'sb-top' });
+
+  // Title
+  top.appendChild(h('div', { className: 'sb-title' }, ['Financie']));
+
+  // Month nav
+  const nav = h('div', { className: 'sb-month' });
+  nav.appendChild(h('button', { className: 'month-btn', onclick: () => stepMonth(-1) }, []));
+  nav.children[0].innerHTML = icon('chevLeft', 14);
+  const lbl = h('div', { className: 'sb-month-label' }, [SK_MONTHS[viewMonth - 1] + ' ' + viewYear]);
+  nav.appendChild(lbl);
+  const nb = h('button', { className: 'month-btn', onclick: () => stepMonth(1) });
+  nb.innerHTML = icon('chevRight', 14);
+  nav.appendChild(nb);
+  top.appendChild(nav);
+
+  // Stats
+  const stats = getStats(viewYear, viewMonth);
+  const domTotal = getDomainsForMonth(viewYear, viewMonth).reduce((s, d) => s + d.amount, 0);
+  const statsCard = h('div', { className: 'sb-stats' });
+  statsCard.appendChild(sbStat('Príjem', fmt(stats.income, true), 'val-green'));
+  statsCard.appendChild(sbStat('Výdavky', '−' + fmt(stats.expenses), 'val-red'));
+  if (domTotal > 0) statsCard.appendChild(sbStat('  z toho domény', '−' + fmt(domTotal), 'val-red'));
+  statsCard.appendChild(sbStat('Zostatok', fmt(stats.net, true), stats.net >= 0 ? 'val-green' : 'val-red'));
+  top.appendChild(statsCard);
+
+  sb.appendChild(top);
+
+  // Nav
+  const navSection = h('div', { className: 'sb-nav' });
+  navSection.appendChild(h('div', { className: 'sb-nav-label' }, ['Sekcie']));
+
+  const navItems = [
+    { id: 'platby',    label: 'Platobný kalendár', ico: 'calendar' },
+    { id: 'zostatok',  label: 'Zostatok & výplata', ico: 'wallet' },
+    { id: 'domeny',    label: 'Domény & Hosting',  ico: 'globe' },
+    { id: 'projekcia', label: 'Projekcia',          ico: 'trending' },
+  ];
+
+  navItems.forEach(ni => {
+    const btn = h('button', {
+      className: 'nav-item' + (activeSection === ni.id ? ' active' : ''),
+      onclick: () => { activeSection = ni.id; render(); }
+    });
+    btn.innerHTML = icon(ni.ico, 16) + '<span>' + ni.label + '</span>';
+    navSection.appendChild(btn);
+  });
+
+  sb.appendChild(navSection);
+
+  // Mini trend
+  const proj = getProjection(6);
+  const maxAbs = Math.max(...proj.map(p => Math.abs(p.net)), 1);
+  const trendSec = h('div', { className: 'sb-trend' });
+  trendSec.appendChild(h('div', { className: 'sb-trend-label' }, ['Trend 6 mes.']));
+  const bars = h('div', { className: 'mini-bars' });
+  proj.forEach(p => {
+    const pct = Math.abs(p.net) / maxAbs;
+    const bh = Math.max(pct * 30, 3);
+    const col = h('div', { className: 'mini-bar-col' });
+    col.appendChild(h('div', { className: 'mini-bar', style: `height:${bh}px;background:${p.net >= 0 ? '#A3D4B0' : '#F4A7A0'};` }));
+    col.appendChild(h('div', { className: 'mini-bar-lbl' }, [SK_MONTHS_S[p.m - 1].slice(0, 1)]));
+    bars.appendChild(col);
+  });
+  trendSec.appendChild(bars);
+  sb.appendChild(trendSec);
+
+  // Balance + today
+  const bottom = h('div', { className: 'sb-bottom' });
+  bottom.appendChild(h('div', { className: 'sb-bottom-label' }, ['Zostatok na účte']));
+  const balIn = h('input', { type: 'number', className: 'bal-input', value: state.startingBalance, step: '0.01', placeholder: '0,00' });
+  balIn.onchange = e => { state.startingBalance = parseFloat(e.target.value) || 0; saveState(); render(); };
+  bottom.appendChild(balIn);
+
+  // Extra incomes
+  const extraSec = h('div', { className: 'extra-income-section' });
+  extraSec.appendChild(h('div', { className: 'extra-income-label' }, ['Extra príjem']));
+
+  const extras = getExtraIncomes(viewYear, viewMonth);
+  if (extras.length > 0) {
+    const list = h('div', { className: 'extra-income-list' });
+    extras.forEach((ex, idx) => {
+      const row = h('div', { className: 'extra-income-row' });
+      row.appendChild(h('div', { className: 'extra-income-name' }, [ex.name || 'Príjem']));
+      row.appendChild(h('div', { className: 'extra-income-amt' }, ['+' + fmt(ex.amount)]));
+      const del = h('button', { className: 'extra-income-del', title: 'Odstrániť' }, ['×']);
+      del.onclick = () => {
+        const k = mkey(viewYear, viewMonth);
+        state.extraIncomes[k] = state.extraIncomes[k].filter((_, i) => i !== idx);
+        saveState(); render();
+      };
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+    extraSec.appendChild(list);
+  }
+
+  if (showExtraForm) {
+    const form = h('div', { className: 'extra-income-form' });
+    const nameIn = h('input', { type: 'text', className: 'extra-input extra-input-name', placeholder: 'Názov príjmu' });
+    const amtIn = h('input', { type: 'number', className: 'extra-input extra-input-amt', placeholder: '0,00', step: '0.01', min: '0' });
+    const dayIn = h('input', { type: 'number', className: 'extra-input extra-input-day', placeholder: 'Deň', min: '1', max: '31' });
+    form.appendChild(nameIn);
+    const row1 = h('div', { className: 'extra-form-row' });
+    row1.appendChild(amtIn); row1.appendChild(dayIn);
+    form.appendChild(row1);
+    const actions = h('div', { className: 'extra-form-actions' });
+    const saveBtn = h('button', { className: 'extra-save-btn' }, ['Pridať']);
+    saveBtn.onclick = () => {
+      const amt = parseFloat(amtIn.value);
+      if (!amt || amt <= 0) { amtIn.focus(); return; }
+      const k = mkey(viewYear, viewMonth);
+      if (!state.extraIncomes[k]) state.extraIncomes[k] = [];
+      state.extraIncomes[k].push({ name: nameIn.value.trim() || 'Extra príjem', amount: amt, day: parseInt(dayIn.value) || INCOME_DAY, id: 'extra_' + Date.now() });
+      showExtraForm = false; saveState(); render();
+    };
+    const cancelBtn = h('button', { className: 'extra-cancel-btn' }, ['Zrušiť']);
+    cancelBtn.onclick = () => { showExtraForm = false; renderSidebar(); };
+    actions.appendChild(saveBtn); actions.appendChild(cancelBtn);
+    form.appendChild(actions);
+    extraSec.appendChild(form);
+    setTimeout(() => nameIn.focus(), 10);
+  } else {
+    const addBtn = h('button', { className: 'add-extra-btn' });
+    addBtn.innerHTML = icon('check', 13) + '<span>Pridať extra príjem</span>';
+    addBtn.querySelector('svg').style.cssText = 'opacity:0.5;transform:rotate(45deg)';
+    addBtn.onclick = () => { showExtraForm = true; renderSidebar(); };
+    extraSec.appendChild(addBtn);
+  }
+
+  bottom.appendChild(extraSec);
+
+  const isCurrent = viewYear === now.getFullYear() && viewMonth === now.getMonth() + 1;
+  if (!isCurrent) {
+    const tb = h('button', { className: 'today-btn-sm', style: 'margin-top:10px;width:100%;', onclick: () => { viewYear = now.getFullYear(); viewMonth = now.getMonth() + 1; render(); } }, ['Aktuálny mesiac']);
+    bottom.appendChild(tb);
+  }
+  sb.appendChild(bottom);
+}
+
+function sbStat(label, value, valCls) {
+  return h('div', { className: 'sb-stat' }, [
+    h('div', { className: 'sb-stat-label' }, [label]),
+    h('div', { className: 'sb-stat-val ' + valCls }, [value]),
+  ]);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER – PAGE HEADER
+// ═══════════════════════════════════════════════════════
+
+function renderPageHeader() {
+  const ph = document.getElementById('page-header');
+  ph.innerHTML = '';
+
+  const titles = { platby: 'Platobný kalendár', zostatok: 'Zostatok & výplata', domeny: 'Domény & Hosting', projekcia: 'Projekcia' };
+  const title = h('div');
+  title.appendChild(h('div', { className: 'page-title' }, [titles[activeSection]]));
+  title.appendChild(h('div', { className: 'page-subtitle' }, [SK_MONTHS[viewMonth - 1] + ' ' + viewYear]));
+  ph.appendChild(title);
+
+  if (activeSection === 'platby') {
+    const toggle = h('div', { className: 'view-toggle' });
+
+    const calBtn = h('button', { className: 'view-toggle-btn' + (calView ? ' active' : ''), onclick: () => { calView = true; selectedDay = null; renderContent(); renderPageHeader(); } });
+    calBtn.innerHTML = icon('grid', 14) + '<span>Kalendár</span>';
+
+    const listBtn = h('button', { className: 'view-toggle-btn' + (!calView ? ' active' : ''), onclick: () => { calView = false; renderContent(); renderPageHeader(); } });
+    listBtn.innerHTML = icon('list', 14) + '<span>Zoznam</span>';
+
+    toggle.appendChild(calBtn);
+    toggle.appendChild(listBtn);
+    ph.appendChild(toggle);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER – CONTENT
+// ═══════════════════════════════════════════════════════
+
+function renderContent() {
+  const el = document.getElementById('content');
+  el.innerHTML = '';
+  if (activeSection === 'platby') {
+    if (calView) el.appendChild(renderCalendar());
+    else el.appendChild(renderList());
+  } else if (activeSection === 'zostatok') {
+    el.appendChild(renderZostatok());
+  } else if (activeSection === 'domeny') {
+    el.appendChild(renderDomeny());
+  } else {
+    el.appendChild(renderProj());
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CALENDAR VIEW
+// ═══════════════════════════════════════════════════════
+
+function renderCalendar() {
+  const wrap = h('div');
+
+  // Weekday headers
+  const wdRow = h('div', { className: 'cal-grid-header' });
+  SK_WEEKDAYS.forEach(d => wdRow.appendChild(h('div', { className: 'cal-weekday' }, [d])));
+  wrap.appendChild(wdRow);
+
+  // Grid
+  const grid = h('div', { className: 'cal-grid' });
+
+  const firstDay = new Date(viewYear, viewMonth - 1, 1);
+  const firstWeekday = (firstDay.getDay() + 6) % 7; // Mo=0
+  const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  // Empty cells before day 1
+  for (let i = 0; i < firstWeekday; i++) {
+    grid.appendChild(h('div', { className: 'cal-cell empty' }));
+  }
+
+  // Day cells
+  for (let day = 1; day <= daysInMonth; day++) {
+    grid.appendChild(renderCalCell(day));
+  }
+
+  wrap.appendChild(grid);
+
+  // Detail panel for selected day
+  if (selectedDay !== null) {
+    wrap.appendChild(renderDayDetail(selectedDay));
+  }
+
+  // List below calendar
+  wrap.appendChild(h('div', { style: 'height:24px' }));
+  wrap.appendChild(renderList(true));
+
+  return wrap;
+}
+
+function renderCalCell(day) {
+  const events = getEventsForDay(viewYear, viewMonth, day);
+  const isToday = isTodayDay(day);
+  const isPast = isPastDay(day);
+  const isSelected = selectedDay === day;
+
+  const cls = ['cal-cell',
+    isToday ? 'is-today' : '',
+    isPast ? 'is-past' : '',
+    isSelected ? 'is-selected' : ''
+  ].filter(Boolean).join(' ');
+
+  const cell = h('div', { className: cls });
+  cell.onclick = () => {
+    selectedDay = isSelected ? null : day;
+    renderContent();
+  };
+
+  // Day number
+  cell.appendChild(h('div', { className: 'cal-day-num' }, [String(day)]));
+
+  // Events (show max 3, then +N)
+  const maxShow = 3;
+  const show = events.slice(0, maxShow);
+  show.forEach(ev => {
+    const pill = h('div', { className: 'cal-event-pill ' + evClass(ev) }, [ev.name]);
+    cell.appendChild(pill);
+  });
+
+  if (events.length > maxShow) {
+    cell.appendChild(h('div', { className: 'cal-event-more' }, [`+${events.length - maxShow} ďalšie`]));
+  }
+
+  return cell;
+}
+
+function renderDayDetail(day) {
+  const events = getEventsForDay(viewYear, viewMonth, day);
+  const detail = h('div', { className: 'cal-detail' });
+
+  const dayName = new Date(viewYear, viewMonth - 1, day);
+  const weekdayName = ['Nedeľa','Pondelok','Utorok','Streda','Štvrtok','Piatok','Sobota'][dayName.getDay()];
+
+  detail.appendChild(h('div', { className: 'cal-detail-header' }, [
+    weekdayName + ', ' + day + '. ' + SK_MONTHS[viewMonth - 1].toLowerCase() + ' ' + viewYear
+  ]));
+
+  if (events.length === 0) {
+    detail.appendChild(h('div', { className: 'cal-detail-empty' }, ['Žiadne platby tento deň']));
+    return detail;
+  }
+
+  events.forEach(ev => {
+    detail.appendChild(renderListRow(ev));
+  });
+
+  return detail;
+}
+
+// ═══════════════════════════════════════════════════════
+// LIST VIEW
+// ═══════════════════════════════════════════════════════
+
+function renderList(compact = false) {
+  const wrap = h('div');
+
+  if (!compact) {
+    const hdr = h('div', { className: 'list-header' });
+    ['Deň', 'Položka', 'Suma', ''].forEach((t, i) => {
+      hdr.appendChild(h('div', { className: 'list-th' + (i >= 2 ? ' right' : '') }, [t]));
+    });
+    wrap.appendChild(hdr);
+  } else {
+    // Compact header for below-calendar
+    const sec = h('div', { className: 'sb-nav-label', style: 'padding:0;margin-bottom:8px;margin-top:4px;' }, ['Všetky platby']);
+    wrap.appendChild(sec);
+    const hdr = h('div', { className: 'list-header' });
+    ['Deň', 'Položka', 'Suma', ''].forEach((t, i) => {
+      hdr.appendChild(h('div', { className: 'list-th' + (i >= 2 ? ' right' : '') }, [t]));
+    });
+    wrap.appendChild(hdr);
+  }
+
+  const events = getAllEventsForMonth(viewYear, viewMonth);
+  events.forEach(ev => wrap.appendChild(renderListRow(ev)));
+
+  // Total
+  const stats = getStats(viewYear, viewMonth);
+  const totalRow = h('div', { className: 'list-total-row' });
+  totalRow.appendChild(h('div', { className: 'total-label', style: 'grid-column:1/3' }, ['Mesačný zostatok']));
+  totalRow.appendChild(h('div', { className: 'total-val', style: `color:${stats.net >= 0 ? 'var(--green)' : 'var(--red)'}` }, [fmt(stats.net, true)]));
+  totalRow.appendChild(h('div'));
+  wrap.appendChild(totalRow);
+
+  return wrap;
+}
+
+function renderListRow(ev) {
+  const mk = mkey(viewYear, viewMonth);
+  const paidKey = mk + '-' + ev.id;
+  const isPaid = !!state.paidIds[paidKey];
+  const isCancelled = state.cancelledIds.includes(ev.id);
+
+  const cls = ['list-row',
+    ev.isIncome ? 'income-row' : '',
+    (ev.isReminder || ev.payType === 'reminder') ? 'reminder-row' : '',
+    isPaid && !ev.isIncome ? 'is-paid' : '',
+    isCancelled ? 'is-cancelled' : '',
+    isPastDay(ev.day) && !ev.isIncome ? 'is-past' : '',
+    isTodayDay(ev.day) ? 'is-today-row' : '',
+  ].filter(Boolean).join(' ');
+
+  const row = h('div', { className: cls });
+
+  row.appendChild(h('div', { className: 'row-day' }, [ev.day ? String(ev.day) : '']));
+
+  const info = h('div', { className: 'row-info' });
+  info.appendChild(h('span', { className: 'row-name' }, [ev.name]));
+  info.appendChild(makeTag(ev));
+  if (ev.note) info.appendChild(h('span', { className: 'row-note' }, ['· ' + ev.note]));
+  row.appendChild(info);
+
+  // Amount
+  let amtEl;
+  if (ev.isIncome) {
+    amtEl = h('div', { className: 'row-amount income editable', title: 'Klikni pre úpravu' });
+    amtEl.textContent = fmt(ev.amount, true);
+    amtEl.onclick = () => startEdit(amtEl, ev.amount, val => { state.customIncome[mkey(viewYear, viewMonth)] = val; saveState(); render(); });
+  } else if (ev.isReminder) {
+    amtEl = h('div', { className: 'row-amount' }, ['']);
+  } else if (ev.variable) {
+    const val = getDph(viewYear, viewMonth);
+    amtEl = h('div', { className: 'row-amount expense editable', title: 'Klikni pre úpravu DPH' });
+    amtEl.textContent = '−' + fmt(val);
+    amtEl.onclick = () => startEdit(amtEl, val, v => { state.dphAmounts[mkey(viewYear, viewMonth)] = v; saveState(); render(); });
+  } else {
+    amtEl = h('div', { className: 'row-amount expense' }, [ev.amount ? '−' + fmt(ev.amount) : '']);
+  }
+  row.appendChild(amtEl);
+
+  // Controls
+  const ctrl = h('div', { className: 'row-ctrl' });
+
+  if (!ev.isIncome && !ev.isReminder) {
+    const pb = h('button', { className: 'ctrl-btn' + (isPaid ? ' paid' : ''), title: isPaid ? 'Nezaplatené' : 'Zaplatené' });
+    pb.innerHTML = icon(isPaid ? 'check' : 'check', 13);
+    pb.style.opacity = isPaid ? '1' : '0.3';
+    pb.onclick = () => { if (isPaid) delete state.paidIds[paidKey]; else state.paidIds[paidKey] = true; saveState(); render(); };
+    ctrl.appendChild(pb);
+  }
+
+  if (!ev.isIncome && !ev.isReminder && ev.id !== 'dph') {
+    const cb = h('button', { className: 'ctrl-btn' + (isCancelled ? ' cancelled' : ''), title: isCancelled ? 'Obnoviť' : 'Vyradiť' });
+    cb.innerHTML = icon(isCancelled ? 'undo' : 'x', 13);
+    cb.onclick = () => { if (isCancelled) state.cancelledIds = state.cancelledIds.filter(x => x !== ev.id); else state.cancelledIds.push(ev.id); saveState(); render(); };
+    ctrl.appendChild(cb);
+  }
+
+  row.appendChild(ctrl);
+  return row;
+}
+
+// ═══════════════════════════════════════════════════════
+// DOMAINS TAB
+// ═══════════════════════════════════════════════════════
+// ZOSTATOK & VÝPLATA
+// ═══════════════════════════════════════════════════════
+
+function renderZostatok() {
+  const wrap = h('div');
+
+  // ── Balance input card ──
+  const inputCard = h('div', { className: 'zost-input-card' });
+  const inputRow = h('div', { className: 'zost-input-row' });
+  inputRow.appendChild(h('div', { className: 'zost-input-label' }, ['Aktuálny zostatok na účte']));
+
+  const amtInput = h('input', {
+    type: 'number', className: 'zost-amount-input',
+    placeholder: '0,00', step: '0.01',
+    value: state.currentBalance !== null ? state.currentBalance : ''
+  });
+  amtInput.onchange = () => {
+    const v = parseFloat(amtInput.value);
+    state.currentBalance = isNaN(v) ? null : v;
+    saveState(); renderContent();
+  };
+  inputRow.appendChild(amtInput);
+  inputRow.appendChild(h('span', { className: 'zost-currency' }, ['€']));
+  inputCard.appendChild(inputRow);
+
+  const dateNote = h('div', { className: 'zost-date-note' });
+  dateNote.textContent = 'Stav k dnešnému dňu: ' + now.getDate() + '. ' + SK_MONTHS[now.getMonth()].toLowerCase() + ' ' + now.getFullYear();
+  inputCard.appendChild(dateNote);
+  wrap.appendChild(inputCard);
+
+  if (state.currentBalance === null) {
+    const empty = h('div', { className: 'zost-no-balance' });
+    empty.appendChild(h('div', { className: 'zost-no-balance-icon' }, ['💳']));
+    empty.appendChild(h('div', { className: 'zost-no-balance-text' }, ['Zadaj aktuálny zostatok na účte']));
+    empty.appendChild(h('div', { className: 'zost-no-balance-sub' }, ['Vypočítam, koľko ostane do konca mesiaca a do ďalšej výplaty']));
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  // ── Toggle ──
+  const toggle = h('div', { className: 'zost-toggle' });
+  const btnMonth = h('button', { className: 'zost-toggle-btn' + (balanceView === 'month' ? ' active' : ''), onclick: () => { balanceView = 'month'; renderContent(); } }, ['Do konca mesiaca']);
+  const btnPayday = h('button', { className: 'zost-toggle-btn' + (balanceView === 'payday' ? ' active' : ''), onclick: () => { balanceView = 'payday'; renderContent(); } }, ['Do ďalšej výplaty']);
+  toggle.appendChild(btnMonth);
+  toggle.appendChild(btnPayday);
+  wrap.appendChild(toggle);
+
+  // ── Build event list ──
+  const todayDay = now.getDate();
+  const todayMonth = now.getMonth() + 1;
+  const todayYear = now.getFullYear();
+
+  // Determine next payday
+  const nextPaydayInThisMonth = todayMonth === now.getMonth() + 1 && INCOME_DAY > todayDay;
+  let paydayY, paydayM, paydayD;
+  if (nextPaydayInThisMonth) {
+    paydayY = todayYear; paydayM = todayMonth; paydayD = INCOME_DAY;
+  } else {
+    paydayM = todayMonth + 1; paydayY = todayYear;
+    if (paydayM > 12) { paydayM = 1; paydayY++; }
+    paydayD = INCOME_DAY;
+  }
+
+  // Collect remaining events
+  const events = [];
+
+  const addEventsForRange = (y, m, fromDay, toDay) => {
+    // Fixed expenses
+    getFixedForMonth(y, m).forEach(ev => {
+      if (ev.isReminder) return;
+      if (ev.day > fromDay && ev.day <= toDay) events.push({ ...ev, y, m });
+    });
+    // Domain renewals
+    getDomainsForMonth(y, m).forEach(d => {
+      const dt = new Date(d.renewDate);
+      const dd = dt.getDate();
+      if (dd > fromDay && dd <= toDay) events.push({ ...d, isDomain: true, day: dd, y, m });
+    });
+    // Extra incomes
+    getExtraIncomes(y, m).forEach(ex => {
+      if (ex.day > fromDay && ex.day <= toDay) events.push({ ...ex, isIncome: true, payType: 'income', isExtra: true, y, m });
+    });
+  };
+
+  if (balanceView === 'month') {
+    const daysInMonth = new Date(todayYear, todayMonth, 0).getDate();
+    addEventsForRange(todayYear, todayMonth, todayDay, daysInMonth);
+  } else {
+    // From today to end of current month
+    const daysInCurMonth = new Date(todayYear, todayMonth, 0).getDate();
+    addEventsForRange(todayYear, todayMonth, todayDay, daysInCurMonth);
+
+    // Then from day 0 to paydayD in next month (if payday is next month)
+    if (!(paydayY === todayYear && paydayM === todayMonth)) {
+      addEventsForRange(paydayY, paydayM, 0, paydayD - 1);
+      // Add payday income itself
+      const payIncome = getIncome(paydayY, paydayM);
+      events.push({ id: 'income', name: 'Výplata', payType: 'income', isIncome: true, amount: payIncome, day: paydayD, y: paydayY, m: paydayM });
+      getExtraIncomes(paydayY, paydayM).filter(ex => ex.day <= paydayD).forEach(ex => {
+        events.push({ ...ex, isIncome: true, payType: 'income', isExtra: true, y: paydayY, m: paydayM });
+      });
+    } else {
+      // Payday is still this month
+      const payIncome = getIncome(todayYear, todayMonth);
+      events.push({ id: 'income', name: 'Výplata', payType: 'income', isIncome: true, amount: payIncome, day: paydayD, y: todayYear, m: todayMonth });
+    }
+  }
+
+  // Sort by month then day
+  events.sort((a, b) => {
+    if (a.y !== b.y) return a.y - b.y;
+    if (a.m !== b.m) return a.m - b.m;
+    return (a.day || 0) - (b.day || 0);
+  });
+
+  // ── Timeline card ──
+  const timeline = h('div', { className: 'zost-timeline' });
+
+  // Header: current balance
+  const tlHeader = h('div', { className: 'zost-tl-header' });
+  tlHeader.appendChild(h('div', { className: 'zost-tl-header-label' }, ['Zostatok dnes (' + todayDay + '. ' + SK_MONTHS[todayMonth - 1].toLowerCase() + ')']));
+  tlHeader.appendChild(h('div', { className: 'zost-tl-header-balance', style: 'color:var(--text)' }, [fmt(state.currentBalance)]));
+  timeline.appendChild(tlHeader);
+
+  // Rows with running balance
+  let running = state.currentBalance;
+  let lastMonth = null;
+
+  events.forEach(ev => {
+    // Month separator
+    const evMonthKey = ev.y + '-' + ev.m;
+    if (evMonthKey !== lastMonth && !(ev.y === todayYear && ev.m === todayMonth)) {
+      const sep = h('div', { className: 'zost-row zost-separator' });
+      sep.appendChild(h('div', { className: 'zost-day' }, ['']));
+      sep.appendChild(h('div', { className: 'zost-name', style: 'font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;' }, [SK_MONTHS[ev.m - 1] + ' ' + ev.y]));
+      sep.appendChild(h('div'));
+      sep.appendChild(h('div'));
+      timeline.appendChild(sep);
+      lastMonth = evMonthKey;
+    }
+
+    const isIncome = ev.isIncome;
+    const amount = ev.amount || 0;
+    if (isIncome) running += amount;
+    else running -= amount;
+
+    const row = h('div', { className: 'zost-row' + (isIncome ? ' zost-income' : '') });
+    row.appendChild(h('div', { className: 'zost-day' }, [ev.day ? String(ev.day) : '']));
+
+    const nameEl = h('div', { className: 'zost-name' });
+    nameEl.appendChild(document.createTextNode(ev.name));
+    nameEl.appendChild(makeTag(ev));
+    row.appendChild(nameEl);
+
+    const amtEl = h('div', { className: 'zost-expense ' + (isIncome ? 'pos' : 'neg') });
+    amtEl.textContent = isIncome ? '+' + fmt(amount) : '−' + fmt(amount);
+    row.appendChild(amtEl);
+
+    row.appendChild(h('div', { className: 'zost-running' }, [fmt(running)]));
+    timeline.appendChild(row);
+  });
+
+  if (events.length === 0) {
+    const empty = h('div', { style: 'padding:20px;text-align:center;font-size:13px;color:var(--text-3);' }, ['Žiadne ďalšie platby do konca mesiaca 🎉']);
+    timeline.appendChild(empty);
+  }
+
+  wrap.appendChild(timeline);
+
+  // ── Result card ──
+  const endLabel = balanceView === 'month'
+    ? 'Koniec ' + SK_MONTHS[todayMonth - 1].toLowerCase() + ' ' + todayYear
+    : paydayD + '. ' + SK_MONTHS[paydayM - 1].toLowerCase() + ' ' + paydayY + ' (po výplate)';
+
+  const resultCard = h('div', { className: 'zost-result-card' + (running < 0 ? ' negative' : '') });
+  const resultLeft = h('div');
+  resultLeft.appendChild(h('div', { className: 'zost-result-label' }, [balanceView === 'month' ? 'Zostatok na konci mesiaca' : 'Zostatok po ďalšej výplate']));
+  resultLeft.appendChild(h('div', { className: 'zost-result-date' }, [endLabel]));
+  resultCard.appendChild(resultLeft);
+  resultCard.appendChild(h('div', { className: 'zost-result-amount' }, [fmt(running, true)]));
+  wrap.appendChild(resultCard);
+
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════
+
+function renderDomeny() {
+  const wrap = h('div');
+
+  // This month
+  const thisMonth = getDomainsForMonth(viewYear, viewMonth);
+  const thisTotal = thisMonth.reduce((s, d) => s + d.amount, 0);
+
+  const sec1 = h('div', { className: 'domain-section' });
+  const hdr1 = h('div', { className: 'section-heading' });
+  hdr1.appendChild(document.createTextNode('Tento mesiac'));
+  if (thisTotal > 0) hdr1.appendChild(h('span', { className: 'section-heading-val' }, ['−' + fmt(thisTotal)]));
+  sec1.appendChild(hdr1);
+
+  if (thisMonth.length === 0) {
+    sec1.appendChild(h('div', { className: 'no-items' }, ['Žiadne obnovenia tento mesiac']));
+  } else {
+    const card = h('div', { className: 'domain-card' });
+    thisMonth.forEach(d => card.appendChild(renderDomainRow(d)));
+    sec1.appendChild(card);
+  }
+  wrap.appendChild(sec1);
+
+  // Upcoming 12 months
+  const groups = [];
+  for (let i = 1; i <= 12; i++) {
+    let m = viewMonth + i, y = viewYear;
+    if (m > 12) { m -= 12; y++; }
+    const items = DOMAINS.filter(d => {
+      if (state.cancelledIds.includes(d.id)) return false;
+      const dt = new Date(d.renewDate);
+      return dt.getFullYear() === y && dt.getMonth() + 1 === m;
+    });
+    if (items.length) groups.push({ y, m, items });
+  }
+
+  if (groups.length) {
+    const sec2 = h('div', { className: 'domain-section' });
+    sec2.appendChild(h('div', { className: 'section-heading' }, ['Nadchádzajúce']));
+    groups.forEach(g => {
+      const total = g.items.reduce((s, d) => s + d.amount, 0);
+      const glbl = h('div', { className: 'group-month-label' }, [
+        SK_MONTHS[g.m - 1] + ' ' + g.y,
+        h('span', { className: 'group-month-total' }, ['−' + fmt(total)])
+      ]);
+      sec2.appendChild(glbl);
+      const card = h('div', { className: 'domain-card' });
+      g.items.forEach(d => card.appendChild(renderDomainRow(d)));
+      sec2.appendChild(card);
+    });
+    wrap.appendChild(sec2);
+  }
+
+  return wrap;
+}
+
+function renderDomainRow(d) {
+  const isCancelled = state.cancelledIds.includes(d.id);
+  const dt = new Date(d.renewDate);
+  const row = h('div', { className: 'domain-row' + (isCancelled ? ' cancelled' : '') });
+  row.appendChild(h('div', { className: 'dom-day' }, [String(dt.getDate())]));
+  const nm = h('div', { className: 'dom-name' });
+  nm.appendChild(h('span', { className: 'tag tag-domain' }, [d.dtype]));
+  nm.appendChild(document.createTextNode(d.name));
+  row.appendChild(nm);
+  row.appendChild(h('div', { className: 'dom-amount' }, ['−' + fmt(d.amount)]));
+  const cb = h('button', { className: 'ctrl-btn' + (isCancelled ? ' cancelled' : ''), title: isCancelled ? 'Obnoviť' : 'Zrušiť' });
+  cb.innerHTML = icon(isCancelled ? 'undo' : 'x', 13);
+  cb.onclick = () => { if (isCancelled) state.cancelledIds = state.cancelledIds.filter(x => x !== d.id); else state.cancelledIds.push(d.id); saveState(); render(); };
+  row.appendChild(h('div', { className: 'dom-ctrl' }, [cb]));
+  return row;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROJEKCIA TAB
+// ═══════════════════════════════════════════════════════
+
+function renderProj() {
+  const wrap = h('div');
+
+  const proj = getProjection(12);
+  const chartCard = h('div', { className: 'chart-card' });
+  chartCard.appendChild(buildSVG(proj));
+  wrap.appendChild(chartCard);
+
+  const table = h('table', { className: 'proj-table' });
+  const thead = h('thead');
+  thead.appendChild(h('tr', {}, [
+    h('th', { style: 'text-align:left' }, ['Mesiac']),
+    h('th', {}, ['Príjem']),
+    h('th', {}, ['Výdavky']),
+    h('th', {}, ['Net']),
+    h('th', {}, ['Kum. zostatok']),
+  ]));
+  table.appendChild(thead);
+
+  const tbody = h('tbody');
+  proj.forEach(p => {
+    const isCurr = p.y === now.getFullYear() && p.m === now.getMonth() + 1;
+    tbody.appendChild(h('tr', { className: isCurr ? 'highlight' : '' }, [
+      h('td', {}, [SK_MONTHS[p.m - 1] + ' ' + p.y]),
+      h('td', { style: 'color:var(--green);font-weight:500' }, [fmt(p.income, true)]),
+      h('td', { style: 'color:var(--red)' }, ['−' + fmt(p.expenses)]),
+      h('td', { style: `font-weight:600;color:${p.net >= 0 ? 'var(--green)' : 'var(--red)'}` }, [fmt(p.net, true)]),
+      h('td', { style: `font-weight:700;color:${p.balance >= 0 ? 'var(--green)' : 'var(--red)'}` }, [fmt(p.balance, true)]),
+    ]));
+  });
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  return wrap;
+}
+
+function buildSVG(proj) {
+  const W = 800, H = 200, pL = 60, pR = 20, pT = 16, pB = 36;
+  const cW = W - pL - pR, cH = H - pT - pB;
+  const bals = proj.map(p => p.balance);
+  const mn = Math.min(...bals, 0), mx = Math.max(...bals, 0);
+  const range = mx - mn || 1;
+  const toY = v => pT + cH - ((v - mn) / range) * cH;
+  const bW = cW / proj.length;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('class', 'trend-svg');
+
+  // Grid
+  [0, .25, .5, .75, 1].forEach(f => {
+    const v = mn + range * f, y = toY(v);
+    const ln = document.createElementNS(ns, 'line');
+    ln.setAttribute('x1', pL); ln.setAttribute('x2', pL + cW);
+    ln.setAttribute('y1', y); ln.setAttribute('y2', y);
+    ln.setAttribute('stroke', '#DDE2DD'); ln.setAttribute('stroke-width', '0.5');
+    svg.appendChild(ln);
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', pL - 6); t.setAttribute('y', y + 4);
+    t.setAttribute('text-anchor', 'end'); t.setAttribute('font-size', '9');
+    t.setAttribute('fill', '#9BA09B'); t.setAttribute('font-family', 'system-ui,sans-serif');
+    t.textContent = Math.round(v) + '€';
+    svg.appendChild(t);
+  });
+
+  // Zero line
+  const zy = toY(0);
+  const zl = document.createElementNS(ns, 'line');
+  zl.setAttribute('x1', pL); zl.setAttribute('x2', pL + cW);
+  zl.setAttribute('y1', zy); zl.setAttribute('y2', zy);
+  zl.setAttribute('stroke', '#C5DCC9'); zl.setAttribute('stroke-width', '1');
+  svg.appendChild(zl);
+
+  // Bars
+  proj.forEach((p, i) => {
+    const x = pL + i * bW + bW * 0.2;
+    const bw = bW * 0.6;
+    const isNeg = p.net < 0;
+    const bh = Math.abs(toY(p.net) - zy);
+    const rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', x); rect.setAttribute('width', bw);
+    rect.setAttribute('y', isNeg ? zy : zy - bh);
+    rect.setAttribute('height', Math.max(bh, 2));
+    rect.setAttribute('fill', isNeg ? '#FECACA' : '#A7F3D0'); rect.setAttribute('rx', '3');
+    svg.appendChild(rect);
+  });
+
+  // Balance line
+  const pts = proj.map((p, i) => `${pL + (i + 0.5) * bW},${toY(p.balance)}`).join(' ');
+  const poly = document.createElementNS(ns, 'polyline');
+  poly.setAttribute('points', pts); poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', '#3D7A4F'); poly.setAttribute('stroke-width', '2');
+  poly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(poly);
+
+  proj.forEach((p, i) => {
+    const cx = pL + (i + 0.5) * bW, cy = toY(p.balance);
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+    c.setAttribute('r', '3.5'); c.setAttribute('fill', '#3D7A4F'); c.setAttribute('stroke', '#fff'); c.setAttribute('stroke-width', '1.5');
+    svg.appendChild(c);
+  });
+
+  // Labels
+  proj.forEach((p, i) => {
+    const x = pL + (i + 0.5) * bW;
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', H - 8);
+    t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-size', '9');
+    t.setAttribute('fill', '#9BA09B'); t.setAttribute('font-family', 'system-ui,sans-serif');
+    t.textContent = SK_MONTHS_S[p.m - 1];
+    svg.appendChild(t);
+  });
+
+  return svg;
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+
+function h(tag, props = {}, children = []) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === 'className') el.className = v;
+    else if (k === 'style') el.style.cssText = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v);
+  }
+  for (const c of children) {
+    if (!c && c !== 0) continue;
+    if (typeof c === 'string') el.appendChild(document.createTextNode(c));
+    else el.appendChild(c);
+  }
+  return el;
+}
+
+function stepMonth(dir) {
+  viewMonth += dir;
+  if (viewMonth > 12) { viewMonth = 1; viewYear++; }
+  if (viewMonth < 1) { viewMonth = 12; viewYear--; }
+  selectedDay = null;
+  render();
+}
+
+function startEdit(el, currentVal, onSave) {
+  const input = document.createElement('input');
+  input.type = 'number'; input.className = 'inline-input';
+  input.value = currentVal; input.step = '0.01';
+  el.replaceWith(input);
+  input.focus(); input.select();
+  const done = () => { const v = parseFloat(input.value); if (!isNaN(v) && v >= 0) onSave(v); else render(); };
+  input.onblur = done;
+  input.onkeydown = e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') render(); };
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+
+function render() {
+  renderSidebar();
+  renderPageHeader();
+  renderContent();
+}
+
+render();
+</script>
+</body>
+</html>
