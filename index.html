@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Financie</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%233D7A4F'/><text x='16' y='23' text-anchor='middle' font-family='system-ui,sans-serif' font-weight='700' font-size='20' fill='white'>F</text></svg>">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -36,6 +37,8 @@
     }
 
     html, body { height: 100%; }
+
+    body { overflow-x: hidden; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -685,14 +688,21 @@
       .sidebar { display: none; }
       .page-header { padding: 16px 16px 0; flex-wrap: wrap; gap: 10px; }
       .page-title { font-size: 18px; }
-      .content { padding: 0 12px 80px; }
-      .list-header, .list-row, .list-total-row { grid-template-columns: 42px 1fr 90px 52px; }
+      .content { padding: 0 12px 70px; overflow-x: hidden; max-width: 100vw; }
+      .main { overflow-x: hidden; }
+      .list-header, .list-row, .list-total-row { grid-template-columns: 38px 1fr 80px 44px; gap: 6px; }
+      .row-note { display: none; }
       .row-amount { font-size: 12px; }
       .cal-cell { min-height: 60px; padding: 5px 5px 4px; }
+      .cal-grid { gap: 2px; }
       .cal-event-pill { font-size: 9px; padding: 1px 4px; }
       .zost-result-amount { font-size: 22px; }
       .zost-amount-input { width: 130px; font-size: 15px; }
       .proj-table th, .proj-table td { padding: 8px 10px; font-size: 12px; }
+      .proj-table { display: block; overflow-x: auto; }
+      .domain-card { overflow-x: hidden; }
+      .zost-toggle { width: 100%; }
+      .zost-toggle-btn { flex: 1; text-align: center; }
 
       /* Mobile bottom nav bar */
       .mobile-nav {
@@ -937,6 +947,33 @@
     .zost-no-balance-text { font-size: 14px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
     .zost-no-balance-sub { font-size: 12px; color: var(--text-3); }
 
+    /* ── CALENDAR LEGEND ── */
+    .cal-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      padding: 12px 4px 4px;
+      margin-bottom: 16px;
+    }
+    .cal-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-2);
+    }
+    .cal-legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .zost-excluded { opacity: 0.4; }
+    .zost-excluded .zost-name { text-decoration: line-through; }
+    .zost-excluded .zost-expense { text-decoration: line-through; }
+
     /* ── REMINDER ROW STYLE ── */
     .list-row.reminder-row {
       border-left: 2px solid var(--sky);
@@ -1070,7 +1107,7 @@ const DOMAINS = [
 const STORAGE_KEY = 'drixton_finance_v3';
 
 function defaultState() {
-  return { startingBalance: 0, currentBalance: null, customIncome: {}, dphAmounts: {}, cancelledIds: [], paidIds: {}, extraIncomes: {}, customExpenses: {} };
+  return { startingBalance: 0, currentBalance: null, customIncome: {}, dphAmounts: {}, cancelledIds: [], paidIds: {}, extraIncomes: {}, customExpenses: {}, zostatok_excluded: {} };
 }
 
 function loadState() {
@@ -1449,6 +1486,25 @@ function renderCalendar() {
 
   wrap.appendChild(grid);
 
+  // Legend
+  const legend = h('div', { className: 'cal-legend' });
+  const legendItems = [
+    { color: '#16a34a', label: 'Príjem' },
+    { color: '#2563EB', label: 'Auto platba' },
+    { color: '#C2440A', label: 'Manuálna platba' },
+    { color: '#C0392B', label: 'DPH / Dane' },
+    { color: '#0369A1', label: 'Úloha' },
+    { color: '#6D28D9', label: 'Doména / Hosting' },
+    { color: '#86198F', label: 'Náklad' },
+  ];
+  legendItems.forEach(li => {
+    const item = h('div', { className: 'cal-legend-item' });
+    item.appendChild(h('div', { className: 'cal-legend-dot', style: `background:${li.color}` }));
+    item.appendChild(document.createTextNode(li.label));
+    legend.appendChild(item);
+  });
+  wrap.appendChild(legend);
+
   // Detail panel for selected day
   if (selectedDay !== null) {
     wrap.appendChild(renderDayDetail(selectedDay));
@@ -1691,7 +1747,6 @@ function renderZostatok() {
   const inputCard = h('div', { className: 'zost-input-card' });
   const inputRow = h('div', { className: 'zost-input-row' });
   inputRow.appendChild(h('div', { className: 'zost-input-label' }, ['Aktuálny zostatok na účte']));
-
   const amtInput = h('input', {
     type: 'number', className: 'zost-amount-input',
     placeholder: '0,00', step: '0.01',
@@ -1705,7 +1760,6 @@ function renderZostatok() {
   inputRow.appendChild(amtInput);
   inputRow.appendChild(h('span', { className: 'zost-currency' }, ['€']));
   inputCard.appendChild(inputRow);
-
   const dateNote = h('div', { className: 'zost-date-note' });
   dateNote.textContent = 'Stav k dnešnému dňu: ' + now.getDate() + '. ' + SK_MONTHS[now.getMonth()].toLowerCase() + ' ' + now.getFullYear();
   inputCard.appendChild(dateNote);
@@ -1728,110 +1782,100 @@ function renderZostatok() {
   toggle.appendChild(btnPayday);
   wrap.appendChild(toggle);
 
-  // ── Build event list ──
   const todayDay = now.getDate();
   const todayMonth = now.getMonth() + 1;
   const todayYear = now.getFullYear();
 
-  // Determine next payday
-  const nextPaydayInThisMonth = todayMonth === now.getMonth() + 1 && INCOME_DAY > todayDay;
-  let paydayY, paydayM, paydayD;
-  if (nextPaydayInThisMonth) {
-    paydayY = todayYear; paydayM = todayMonth; paydayD = INCOME_DAY;
-  } else {
+  // Next payday
+  let paydayY = todayYear, paydayM = todayMonth, paydayD = INCOME_DAY;
+  if (INCOME_DAY <= todayDay) {
     paydayM = todayMonth + 1; paydayY = todayYear;
     if (paydayM > 12) { paydayM = 1; paydayY++; }
-    paydayD = INCOME_DAY;
   }
 
-  // Collect remaining events
   const events = [];
 
-  const addEventsForRange = (y, m, fromDay, toDay) => {
-    // Fixed expenses
+  const addEventsForRange = (y, m, fromDay, toDay, includeIncome) => {
     getFixedForMonth(y, m).forEach(ev => {
-      if (ev.isReminder) return;
-      if (ev.day > fromDay && ev.day <= toDay) events.push({ ...ev, y, m });
+      if (ev.isReminder || ev.day <= fromDay || ev.day > toDay) return;
+      events.push({ ...ev, y, m });
     });
-    // Domain renewals
     getDomainsForMonth(y, m).forEach(d => {
-      const dt = new Date(d.renewDate);
-      const dd = dt.getDate();
-      if (dd > fromDay && dd <= toDay) events.push({ ...d, isDomain: true, day: dd, y, m });
+      const dt = new Date(d.renewDate), dd = dt.getDate();
+      if (dd <= fromDay || dd > toDay) return;
+      events.push({ ...d, isDomain: true, day: dd, y, m });
     });
-    // Extra incomes
-    getExtraIncomes(y, m).forEach(ex => {
-      if (ex.day > fromDay && ex.day <= toDay) events.push({ ...ex, isIncome: true, payType: 'income', isExtra: true, y, m });
+    getCustomExpenses(y, m).forEach(e => {
+      if (e.day <= fromDay || e.day > toDay) return;
+      events.push({ ...e, isCustomExpense: true, y, m });
     });
-    // Custom expenses
-    getCustomExpenses(y, m).forEach(ex => {
-      if (ex.day > fromDay && ex.day <= toDay) events.push({ ...ex, isCustomExpense: true, y, m });
+    getExtraIncomes(y, m).forEach(e => {
+      if (e.day <= fromDay || e.day > toDay) return;
+      events.push({ ...e, isIncome: true, payType: 'income', y, m });
     });
+    if (includeIncome && INCOME_DAY > fromDay && INCOME_DAY <= toDay) {
+      events.push({ id: 'income', name: 'Výplata', payType: 'income', isIncome: true, amount: getIncome(y, m), day: INCOME_DAY, y, m });
+    }
   };
 
   if (balanceView === 'month') {
     const daysInMonth = new Date(todayYear, todayMonth, 0).getDate();
-    addEventsForRange(todayYear, todayMonth, todayDay, daysInMonth);
+    addEventsForRange(todayYear, todayMonth, todayDay, daysInMonth, false);
   } else {
-    // From today to end of current month
     const daysInCurMonth = new Date(todayYear, todayMonth, 0).getDate();
-    addEventsForRange(todayYear, todayMonth, todayDay, daysInCurMonth);
-
-    // Then from day 0 to paydayD in next month (if payday is next month)
-    if (!(paydayY === todayYear && paydayM === todayMonth)) {
-      addEventsForRange(paydayY, paydayM, 0, paydayD - 1);
-      // Add payday income itself
-      const payIncome = getIncome(paydayY, paydayM);
-      events.push({ id: 'income', name: 'Výplata', payType: 'income', isIncome: true, amount: payIncome, day: paydayD, y: paydayY, m: paydayM });
-      getExtraIncomes(paydayY, paydayM).filter(ex => ex.day <= paydayD).forEach(ex => {
-        events.push({ ...ex, isIncome: true, payType: 'income', isExtra: true, y: paydayY, m: paydayM });
-      });
+    if (paydayY === todayYear && paydayM === todayMonth) {
+      // Payday still this month
+      addEventsForRange(todayYear, todayMonth, todayDay, paydayD, true);
     } else {
-      // Payday is still this month
-      const payIncome = getIncome(todayYear, todayMonth);
-      events.push({ id: 'income', name: 'Výplata', payType: 'income', isIncome: true, amount: payIncome, day: paydayD, y: todayYear, m: todayMonth });
+      // Payday next month
+      addEventsForRange(todayYear, todayMonth, todayDay, daysInCurMonth, false);
+      addEventsForRange(paydayY, paydayM, 0, paydayD, true);
     }
   }
 
-  // Sort by month then day
   events.sort((a, b) => {
     if (a.y !== b.y) return a.y - b.y;
     if (a.m !== b.m) return a.m - b.m;
     return (a.day || 0) - (b.day || 0);
   });
 
-  // ── Timeline card ──
+  // ── Timeline ──
   const timeline = h('div', { className: 'zost-timeline' });
-
-  // Header: current balance
   const tlHeader = h('div', { className: 'zost-tl-header' });
   tlHeader.appendChild(h('div', { className: 'zost-tl-header-label' }, ['Zostatok dnes (' + todayDay + '. ' + SK_MONTHS[todayMonth - 1].toLowerCase() + ')']));
-  tlHeader.appendChild(h('div', { className: 'zost-tl-header-balance', style: 'color:var(--text)' }, [fmt(state.currentBalance)]));
+  tlHeader.appendChild(h('div', { className: 'zost-tl-header-balance' }, [fmt(state.currentBalance)]));
   timeline.appendChild(tlHeader);
 
-  // Rows with running balance
   let running = state.currentBalance;
+  let balanceBeforePayday = null;
   let lastMonth = null;
 
   events.forEach(ev => {
-    // Month separator
+    const evKey = (ev.id || ev.name) + '-' + ev.y + '-' + ev.m + '-' + (ev.day || 0);
+    const isExcluded = !!(state.zostatok_excluded && state.zostatok_excluded[evKey]);
+
     const evMonthKey = ev.y + '-' + ev.m;
     if (evMonthKey !== lastMonth && !(ev.y === todayYear && ev.m === todayMonth)) {
       const sep = h('div', { className: 'zost-row zost-separator' });
-      sep.appendChild(h('div', { className: 'zost-day' }, ['']));
-      sep.appendChild(h('div', { className: 'zost-name', style: 'font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;' }, [SK_MONTHS[ev.m - 1] + ' ' + ev.y]));
-      sep.appendChild(h('div'));
-      sep.appendChild(h('div'));
+      sep.appendChild(h('div', { className: 'zost-day' }));
+      sep.appendChild(h('div', { style: 'font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;grid-column:2/5' }, [SK_MONTHS[ev.m - 1] + ' ' + ev.y]));
       timeline.appendChild(sep);
       lastMonth = evMonthKey;
     }
 
+    // Track balance just before payday (for payday view)
+    if (balanceView === 'payday' && ev.isIncome && ev.id === 'income' && balanceBeforePayday === null) {
+      balanceBeforePayday = running;
+    }
+
     const isIncome = ev.isIncome;
     const amount = ev.amount || 0;
-    if (isIncome) running += amount;
-    else running -= amount;
+    if (!isExcluded) {
+      if (isIncome) running += amount;
+      else running -= amount;
+    }
 
-    const row = h('div', { className: 'zost-row' + (isIncome ? ' zost-income' : '') });
+    const row = h('div', { className: 'zost-row' + (isIncome ? ' zost-income' : '') + (isExcluded ? ' zost-excluded' : '') });
     row.appendChild(h('div', { className: 'zost-day' }, [ev.day ? String(ev.day) : '']));
 
     const nameEl = h('div', { className: 'zost-name' });
@@ -1843,29 +1887,68 @@ function renderZostatok() {
     amtEl.textContent = isIncome ? '+' + fmt(amount) : '−' + fmt(amount);
     row.appendChild(amtEl);
 
-    row.appendChild(h('div', { className: 'zost-running' }, [fmt(running)]));
+    const rightCol = h('div', { style: 'display:flex;align-items:center;gap:6px;justify-content:flex-end;' });
+    if (!isExcluded) {
+      rightCol.appendChild(h('div', { className: 'zost-running' }, [fmt(running)]));
+    }
+
+    // Exclude/restore button
+    const exBtn = h('button', {
+      className: 'ctrl-btn' + (isExcluded ? ' cancelled' : ''),
+      title: isExcluded ? 'Zahrnúť späť' : 'Vynechať z výpočtu',
+      style: 'flex-shrink:0;'
+    });
+    exBtn.innerHTML = icon(isExcluded ? 'undo' : 'x', 13);
+    exBtn.onclick = () => {
+      if (!state.zostatok_excluded) state.zostatok_excluded = {};
+      if (isExcluded) delete state.zostatok_excluded[evKey];
+      else state.zostatok_excluded[evKey] = true;
+      saveState(); renderContent();
+    };
+    rightCol.appendChild(exBtn);
+    row.appendChild(rightCol);
+
     timeline.appendChild(row);
   });
 
   if (events.length === 0) {
-    const empty = h('div', { style: 'padding:20px;text-align:center;font-size:13px;color:var(--text-3);' }, ['Žiadne ďalšie platby do konca mesiaca 🎉']);
-    timeline.appendChild(empty);
+    timeline.appendChild(h('div', { style: 'padding:20px;text-align:center;font-size:13px;color:var(--text-3);' }, ['Žiadne ďalšie platby 🎉']));
   }
 
   wrap.appendChild(timeline);
 
-  // ── Result card ──
-  const endLabel = balanceView === 'month'
-    ? 'Koniec ' + SK_MONTHS[todayMonth - 1].toLowerCase() + ' ' + todayYear
-    : paydayD + '. ' + SK_MONTHS[paydayM - 1].toLowerCase() + ' ' + paydayY + ' (po výplate)';
+  // ── Result card(s) ──
+  if (balanceView === 'payday' && balanceBeforePayday !== null) {
+    // Two cards: before and after payday
+    const twoCards = h('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:10px;' });
 
-  const resultCard = h('div', { className: 'zost-result-card' + (running < 0 ? ' negative' : '') });
-  const resultLeft = h('div');
-  resultLeft.appendChild(h('div', { className: 'zost-result-label' }, [balanceView === 'month' ? 'Zostatok na konci mesiaca' : 'Zostatok po ďalšej výplate']));
-  resultLeft.appendChild(h('div', { className: 'zost-result-date' }, [endLabel]));
-  resultCard.appendChild(resultLeft);
-  resultCard.appendChild(h('div', { className: 'zost-result-amount' }, [fmt(running, true)]));
-  wrap.appendChild(resultCard);
+    const beforeCard = h('div', { className: 'zost-result-card' + (balanceBeforePayday < 0 ? ' negative' : ''), style: 'opacity:0.85;' });
+    const bl = h('div');
+    bl.appendChild(h('div', { className: 'zost-result-label' }, ['Pred výplatou']));
+    bl.appendChild(h('div', { className: 'zost-result-date' }, [(paydayD - 1) + '. ' + SK_MONTHS[paydayM - 1].toLowerCase()]));
+    beforeCard.appendChild(bl);
+    beforeCard.appendChild(h('div', { className: 'zost-result-amount', style: 'font-size:20px;' }, [fmt(balanceBeforePayday, true)]));
+    twoCards.appendChild(beforeCard);
+
+    const afterCard = h('div', { className: 'zost-result-card' + (running < 0 ? ' negative' : '') });
+    const al = h('div');
+    al.appendChild(h('div', { className: 'zost-result-label' }, ['Po výplate']));
+    al.appendChild(h('div', { className: 'zost-result-date' }, [paydayD + '. ' + SK_MONTHS[paydayM - 1].toLowerCase() + ' ' + paydayY]));
+    afterCard.appendChild(al);
+    afterCard.appendChild(h('div', { className: 'zost-result-amount' }, [fmt(running, true)]));
+    twoCards.appendChild(afterCard);
+
+    wrap.appendChild(twoCards);
+  } else {
+    const endLabel = SK_MONTHS[todayMonth - 1] + ' ' + todayYear;
+    const resultCard = h('div', { className: 'zost-result-card' + (running < 0 ? ' negative' : '') });
+    const rl = h('div');
+    rl.appendChild(h('div', { className: 'zost-result-label' }, ['Zostatok na konci mesiaca']));
+    rl.appendChild(h('div', { className: 'zost-result-date' }, [endLabel]));
+    resultCard.appendChild(rl);
+    resultCard.appendChild(h('div', { className: 'zost-result-amount' }, [fmt(running, true)]));
+    wrap.appendChild(resultCard);
+  }
 
   return wrap;
 }
