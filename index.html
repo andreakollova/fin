@@ -415,7 +415,7 @@
 
     .list-header {
       display: grid;
-      grid-template-columns: 36px 1fr 110px 72px;
+      grid-template-columns: 46px 1fr 110px 72px;
       gap: 8px;
       padding: 0 10px 8px;
       border-bottom: 0.5px solid var(--border);
@@ -434,7 +434,7 @@
 
     .list-row {
       display: grid;
-      grid-template-columns: 36px 1fr 110px 72px;
+      grid-template-columns: 46px 1fr 110px 72px;
       gap: 8px;
       padding: 8px 10px;
       border-radius: var(--r-nav);
@@ -512,7 +512,7 @@
 
     .list-total-row {
       display: grid;
-      grid-template-columns: 36px 1fr 110px 72px;
+      grid-template-columns: 46px 1fr 110px 72px;
       gap: 8px;
       padding: 12px 10px 0;
       margin-top: 4px;
@@ -542,6 +542,8 @@
     .tag-income { background: var(--green-light); color: var(--green); }
     .tag-reminder { background: var(--sky-light); color: var(--sky); }
     .tag-domain { background: var(--violet-light); color: var(--violet); }
+    .tag-naklad { background: #FDF4FF; color: #86198F; }
+    .ev-naklad { background: #FDF4FF; color: #86198F; }
 
     /* ── INLINE EDIT ── */
     .inline-input {
@@ -681,8 +683,42 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 700px) {
       .sidebar { display: none; }
-      .page-header { padding: 20px 16px 0; }
-      .content { padding: 0 16px 60px; }
+      .page-header { padding: 16px 16px 0; flex-wrap: wrap; gap: 10px; }
+      .page-title { font-size: 18px; }
+      .content { padding: 0 12px 80px; }
+      .list-header, .list-row, .list-total-row { grid-template-columns: 42px 1fr 90px 52px; }
+      .row-amount { font-size: 12px; }
+      .cal-cell { min-height: 60px; padding: 5px 5px 4px; }
+      .cal-event-pill { font-size: 9px; padding: 1px 4px; }
+      .zost-result-amount { font-size: 22px; }
+      .zost-amount-input { width: 130px; font-size: 15px; }
+      .proj-table th, .proj-table td { padding: 8px 10px; font-size: 12px; }
+
+      /* Mobile bottom nav bar */
+      .mobile-nav {
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+        background: var(--card); border-top: 0.5px solid var(--border);
+        padding: 8px 0 env(safe-area-inset-bottom, 8px);
+        z-index: 100;
+      }
+      .mobile-nav-btn {
+        flex: 1; display: flex; flex-direction: column; align-items: center;
+        gap: 3px; background: none; border: none; cursor: pointer;
+        padding: 4px 0; color: var(--text-3); font-size: 10px; font-weight: 500;
+        font-family: inherit; transition: color 0.12s;
+      }
+      .mobile-nav-btn.active { color: var(--green); }
+      /* Month nav for mobile */
+      .mobile-month-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 16px; border-bottom: 0.5px solid var(--border);
+        background: var(--card);
+      }
+    }
+
+    @media (min-width: 701px) {
+      .mobile-nav { display: none; }
+      .mobile-month-bar { display: none; }
     }
 
     .today-btn-sm {
@@ -843,10 +879,12 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar"></aside>
   <div class="main">
+    <div class="mobile-month-bar" id="mobile-month-bar"></div>
     <div class="page-header" id="page-header"></div>
     <div class="content" id="content"></div>
   </div>
 </div>
+<nav class="mobile-nav" id="mobile-nav"></nav>
 
 <script>
 'use strict';
@@ -961,7 +999,7 @@ const DOMAINS = [
 const STORAGE_KEY = 'drixton_finance_v3';
 
 function defaultState() {
-  return { startingBalance: 0, currentBalance: null, customIncome: {}, dphAmounts: {}, cancelledIds: [], paidIds: {}, extraIncomes: {} };
+  return { startingBalance: 0, currentBalance: null, customIncome: {}, dphAmounts: {}, cancelledIds: [], paidIds: {}, extraIncomes: {}, customExpenses: {} };
 }
 
 function loadState() {
@@ -996,6 +1034,7 @@ function isSemiAnnual(exp, y, m) {
 function getIncome(y, m) { return state.customIncome[mkey(y,m)] ?? DEFAULT_INCOME; }
 function getDph(y, m) { return state.dphAmounts[mkey(y,m)] ?? DEFAULT_DPH; }
 function getExtraIncomes(y, m) { return state.extraIncomes[mkey(y,m)] || []; }
+function getCustomExpenses(y, m) { return state.customExpenses[mkey(y,m)] || []; }
 function getTotalIncome(y, m) { return getIncome(y, m) + getExtraIncomes(y, m).reduce((s, e) => s + e.amount, 0); }
 
 function getFixedForMonth(y, m) {
@@ -1023,7 +1062,10 @@ function getStats(y, m) {
   const income = getTotalIncome(y, m);
   const fixed = getFixedForMonth(y, m).filter(e => !e.isReminder);
   const domains = getDomainsForMonth(y, m);
-  let expenses = fixed.reduce((s, e) => s + (e.amount || 0), 0) + domains.reduce((s, d) => s + d.amount, 0);
+  const custom = getCustomExpenses(y, m);
+  let expenses = fixed.reduce((s, e) => s + (e.amount || 0), 0)
+    + domains.reduce((s, d) => s + d.amount, 0)
+    + custom.reduce((s, e) => s + e.amount, 0);
   return { income, expenses, net: income - expenses };
 }
 
@@ -1049,6 +1091,7 @@ function getEventsForDay(y, m, day) {
   getExtraIncomes(y, m).filter(e => e.day === day).forEach(e => events.push({ ...e, isIncome: true, payType: 'income', isExtra: true }));
   getFixedForMonth(y, m).forEach(e => { if (e.day === day) events.push(e); });
   getDomainsForMonth(y, m).forEach(d => { const dt = new Date(d.renewDate); if (dt.getDate() === day) events.push({ ...d, isDomain: true }); });
+  getCustomExpenses(y, m).filter(e => e.day === day).forEach(e => events.push({ ...e, isCustomExpense: true }));
   return events;
 }
 
@@ -1059,6 +1102,7 @@ function getAllEventsForMonth(y, m) {
   getExtraIncomes(y, m).forEach(e => events.push({ ...e, isIncome: true, payType: 'income', isExtra: true }));
   getFixedForMonth(y, m).forEach(e => events.push(e));
   getDomainsForMonth(y, m).forEach(d => { const dt = new Date(d.renewDate); events.push({ ...d, isDomain: true, day: dt.getDate() }); });
+  getCustomExpenses(y, m).forEach(e => events.push({ ...e, isCustomExpense: true }));
   events.sort((a, b) => (a.day || 0) - (b.day || 0));
   return events;
 }
@@ -1082,6 +1126,7 @@ function evClass(ev) {
   if (ev.isIncome) return 'ev-income';
   if (ev.isReminder) return 'ev-reminder';
   if (ev.isDomain) return 'ev-domain';
+  if (ev.isCustomExpense) return 'ev-naklad';
   if (ev.category === 'tax') return 'ev-tax';
   if (ev.payType === 'auto') return 'ev-auto';
   return 'ev-manual';
@@ -1091,6 +1136,7 @@ function makeTag(ev) {
   if (ev.isIncome) return mkTag('tag-income', 'príjem');
   if (ev.isReminder || ev.payType === 'reminder') return mkTag('tag-reminder', 'úloha');
   if (ev.isDomain) return mkTag('tag-domain', ev.dtype || 'doména');
+  if (ev.isCustomExpense) return mkTag('tag-naklad', 'náklad');
   if (ev.category === 'tax') return mkTag('tag-tax', ev.id === 'dph' ? 'DPH' : 'dane');
   if (ev.payType === 'auto') return mkTag('tag-auto', 'auto');
   return mkTag('tag-manual', 'manuálne');
@@ -1430,6 +1476,11 @@ function renderList(compact = false) {
   const events = getAllEventsForMonth(viewYear, viewMonth);
   events.forEach(ev => wrap.appendChild(renderListRow(ev)));
 
+  // Add expense button (not in compact mode)
+  if (!compact) {
+    wrap.appendChild(renderAddNakladBtn());
+  }
+
   // Total
   const stats = getStats(viewYear, viewMonth);
   const totalRow = h('div', { className: 'list-total-row' });
@@ -1437,6 +1488,45 @@ function renderList(compact = false) {
   totalRow.appendChild(h('div', { className: 'total-val', style: `color:${stats.net >= 0 ? 'var(--green)' : 'var(--red)'}` }, [fmt(stats.net, true)]));
   totalRow.appendChild(h('div'));
   wrap.appendChild(totalRow);
+
+  return wrap;
+}
+
+let showNakladForm = false;
+
+function renderAddNakladBtn() {
+  const wrap = h('div', { style: 'margin: 8px 0 4px;' });
+
+  if (showNakladForm) {
+    const form = h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 10px;background:var(--card);border:0.5px solid var(--green);border-radius:var(--r-nav);' });
+
+    const nameIn = h('input', { type: 'text', className: 'extra-input', placeholder: 'Názov nákladu', style: 'flex:1;min-width:120px;' });
+    const amtIn  = h('input', { type: 'number', className: 'extra-input extra-input-amt', placeholder: 'Suma', step: '0.01', min: '0' });
+    const dayIn  = h('input', { type: 'number', className: 'extra-input extra-input-day', placeholder: 'Deň', min: '1', max: '31', value: now.getDate() });
+
+    const save = h('button', { className: 'extra-save-btn', style: 'padding:5px 14px;' }, ['Pridať']);
+    save.onclick = () => {
+      const amt = parseFloat(amtIn.value);
+      const day = parseInt(dayIn.value);
+      if (!amt || amt <= 0) { amtIn.focus(); return; }
+      const k = mkey(viewYear, viewMonth);
+      if (!state.customExpenses[k]) state.customExpenses[k] = [];
+      state.customExpenses[k].push({ id: 'naklad_' + Date.now(), name: nameIn.value.trim() || 'Náklad', amount: amt, day: day || 1 });
+      showNakladForm = false; saveState(); render();
+    };
+    const cancel = h('button', { className: 'extra-cancel-btn' }, ['Zrušiť']);
+    cancel.onclick = () => { showNakladForm = false; renderContent(); };
+
+    form.append(nameIn, amtIn, dayIn, save, cancel);
+    wrap.appendChild(form);
+    setTimeout(() => nameIn.focus(), 10);
+  } else {
+    const btn = h('button', { className: 'add-extra-btn', style: 'width:auto;padding:7px 14px;' });
+    btn.innerHTML = icon('check', 13).replace('check','x').replace('M20 6 9 17l-5-5','M12 5v14M5 12h14') + '<span>Pridať náklad</span>';
+    btn.querySelector('svg').style.cssText = 'opacity:0.6;';
+    btn.onclick = () => { showNakladForm = true; renderContent(); };
+    wrap.appendChild(btn);
+  }
 
   return wrap;
 }
@@ -1458,7 +1548,8 @@ function renderListRow(ev) {
 
   const row = h('div', { className: cls });
 
-  row.appendChild(h('div', { className: 'row-day' }, [ev.day ? String(ev.day) : '']));
+  const dayLabel = ev.day ? (ev.day + '.' + viewMonth + '.') : '';
+  row.appendChild(h('div', { className: 'row-day' }, [dayLabel]));
 
   const info = h('div', { className: 'row-info' });
   info.appendChild(h('span', { className: 'row-name' }, [ev.name]));
@@ -1495,7 +1586,17 @@ function renderListRow(ev) {
     ctrl.appendChild(pb);
   }
 
-  if (!ev.isIncome && !ev.isReminder && ev.id !== 'dph') {
+  if (ev.isCustomExpense) {
+    // Custom expenses get a delete button instead
+    const del = h('button', { className: 'ctrl-btn', title: 'Odstrániť' });
+    del.innerHTML = icon('x', 13);
+    del.onclick = () => {
+      const k = mkey(viewYear, viewMonth);
+      state.customExpenses[k] = state.customExpenses[k].filter(e => e.id !== ev.id);
+      saveState(); render();
+    };
+    ctrl.appendChild(del);
+  } else if (!ev.isIncome && !ev.isReminder && ev.id !== 'dph') {
     const cb = h('button', { className: 'ctrl-btn' + (isCancelled ? ' cancelled' : ''), title: isCancelled ? 'Obnoviť' : 'Vyradiť' });
     cb.innerHTML = icon(isCancelled ? 'undo' : 'x', 13);
     cb.onclick = () => { if (isCancelled) state.cancelledIds = state.cancelledIds.filter(x => x !== ev.id); else state.cancelledIds.push(ev.id); saveState(); render(); };
@@ -1590,6 +1691,10 @@ function renderZostatok() {
     // Extra incomes
     getExtraIncomes(y, m).forEach(ex => {
       if (ex.day > fromDay && ex.day <= toDay) events.push({ ...ex, isIncome: true, payType: 'income', isExtra: true, y, m });
+    });
+    // Custom expenses
+    getCustomExpenses(y, m).forEach(ex => {
+      if (ex.day > fromDay && ex.day <= toDay) events.push({ ...ex, isCustomExpense: true, y, m });
     });
   };
 
@@ -1931,10 +2036,39 @@ function startEdit(el, currentVal, onSave) {
 // INIT
 // ═══════════════════════════════════════════════════════
 
+function renderMobileNav() {
+  const nav = document.getElementById('mobile-nav');
+  nav.innerHTML = '';
+  const items = [
+    { id: 'platby',    label: 'Kalendár', ico: 'calendar' },
+    { id: 'zostatok',  label: 'Zostatok', ico: 'wallet' },
+    { id: 'domeny',    label: 'Domény',   ico: 'globe' },
+    { id: 'projekcia', label: 'Projekcia',ico: 'trending' },
+  ];
+  items.forEach(it => {
+    const btn = h('button', { className: 'mobile-nav-btn' + (activeSection === it.id ? ' active' : ''), onclick: () => { activeSection = it.id; render(); } });
+    btn.innerHTML = icon(it.ico, 20) + '<span>' + it.label + '</span>';
+    nav.appendChild(btn);
+  });
+}
+
+function renderMobileMonthBar() {
+  const bar = document.getElementById('mobile-month-bar');
+  bar.innerHTML = '';
+  const prev = h('button', { className: 'month-btn', onclick: () => stepMonth(-1) });
+  prev.innerHTML = icon('chevLeft', 16);
+  const lbl = h('div', { style: 'font-size:14px;font-weight:600;' }, [SK_MONTHS[viewMonth - 1] + ' ' + viewYear]);
+  const next = h('button', { className: 'month-btn', onclick: () => stepMonth(1) });
+  next.innerHTML = icon('chevRight', 16);
+  bar.append(prev, lbl, next);
+}
+
 function render() {
   renderSidebar();
   renderPageHeader();
   renderContent();
+  renderMobileNav();
+  renderMobileMonthBar();
 }
 
 render();
