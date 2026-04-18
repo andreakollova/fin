@@ -11,10 +11,10 @@
       --bg: #F8FAF8;
       --sidebar: #ECEEED;
       --card: #FFFFFF;
-      --border: #DDE2DD;
+      --border: #D0D6D0;
       --text: #0D0F0D;
-      --text-2: #2C2F2C;
-      --text-3: #454A45;
+      --text-2: #1E211E;
+      --text-3: #363A36;
       --green: #3D7A4F;
       --green-hover: #2F6040;
       --green-light: #EBF3EE;
@@ -840,6 +840,19 @@
       flex-shrink: 0;
     }
     .ann-dismiss:hover { color: var(--text); }
+
+    .ann-done-btn {
+      background: none; border: 1px solid var(--border); cursor: pointer;
+      color: var(--text-3); font-size: 13px; font-weight: 600;
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0; font-family: inherit;
+    }
+    .ann-done-btn:hover { border-color: var(--green); color: var(--green); }
+    .ann-done-btn.is-done { background: var(--green); border-color: var(--green); color: #fff; }
+
+    .ann-item.ann-done { opacity: 0.5; }
+    .ann-item.ann-done .ann-name { text-decoration: line-through; }
 
     @media (max-width: 700px) {
       .ann-bar { padding: 0 12px; }
@@ -1994,7 +2007,7 @@ function buildSVG(proj) {
     const t = document.createElementNS(ns, 'text');
     t.setAttribute('x', pL - 6); t.setAttribute('y', y + 4);
     t.setAttribute('text-anchor', 'end'); t.setAttribute('font-size', '9');
-    t.setAttribute('fill', '#9BA09B'); t.setAttribute('font-family', 'system-ui,sans-serif');
+    t.setAttribute('fill', '#545A54'); t.setAttribute('font-family', 'system-ui,sans-serif');
     t.textContent = Math.round(v) + '€';
     svg.appendChild(t);
   });
@@ -2043,7 +2056,7 @@ function buildSVG(proj) {
     const t = document.createElementNS(ns, 'text');
     t.setAttribute('x', x); t.setAttribute('y', H - 8);
     t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-size', '9');
-    t.setAttribute('fill', '#9BA09B'); t.setAttribute('font-family', 'system-ui,sans-serif');
+    t.setAttribute('fill', '#545A54'); t.setAttribute('font-family', 'system-ui,sans-serif');
     t.textContent = SK_MONTHS_S[p.m - 1];
     svg.appendChild(t);
   });
@@ -2094,8 +2107,9 @@ function startEdit(el, currentVal, onSave) {
 // INIT
 // ═══════════════════════════════════════════════════════
 
-// Dismissed IDs this session
+// Dismissed / done IDs this session
 const dismissedAnn = new Set();
+const doneAnn = new Set();
 
 function getUpcomingEvents() {
   const results = [];
@@ -2105,15 +2119,13 @@ function getUpcomingEvents() {
     const d = new Date(ty, tm - 1, td + offset);
     const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
 
-    // Fixed expenses + reminders
+    // Fixed expenses + reminders — only manual, reminders, and variable (DPH); skip auto
     getFixedForMonth(y, m).forEach(ev => {
-      if (ev.day === day) results.push({ ...ev, offset, y, m, day });
+      if (ev.day !== day) return;
+      if (ev.payType === 'auto' && !ev.variable) return; // skip auto, keep DPH (variable)
+      results.push({ ...ev, offset, y, m, day });
     });
-    // Domain renewals
-    getDomainsForMonth(y, m).forEach(dv => {
-      const dt = new Date(dv.renewDate);
-      if (dt.getDate() === day) results.push({ ...dv, isDomain: true, offset, y, m, day });
-    });
+    // Domain renewals — skip from announcement (auto payments)
     // Custom expenses
     getCustomExpenses(y, m).filter(e => e.day === day).forEach(e =>
       results.push({ ...e, isCustomExpense: true, offset, y, m, day })
@@ -2139,10 +2151,12 @@ function renderAnnouncementBar() {
   const wrap = h('div', { className: 'ann-bar' });
 
   events.forEach(ev => {
+    const annKey = ev.id + '-' + ev.y + '-' + ev.m + '-' + ev.day;
+    const isDone = doneAnn.has(annKey);
     const urgency = ev.offset === 0 ? 'urgent' : ev.offset === 1 ? 'warning' : 'notice';
     const whenLabel = ev.offset === 0 ? 'Dnes' : ev.offset === 1 ? 'Zajtra' : 'Pozajtra';
 
-    const item = h('div', { className: 'ann-item ' + urgency });
+    const item = h('div', { className: 'ann-item ' + urgency + (isDone ? ' ann-done' : '') });
 
     item.appendChild(h('span', { className: 'ann-when' }, [whenLabel]));
     item.appendChild(makeTag(ev));
@@ -2153,9 +2167,21 @@ function renderAnnouncementBar() {
       item.appendChild(h('span', { className: 'ann-amount' }, [prefix + fmt(ev.amount)]));
     }
 
+    // Done button
+    const doneBtn = h('button', {
+      className: 'ann-done-btn' + (isDone ? ' is-done' : ''),
+      title: isDone ? 'Označiť ako nevybavené' : 'Vybavené'
+    }, [isDone ? '✓' : '○']);
+    doneBtn.onclick = () => {
+      if (isDone) doneAnn.delete(annKey); else doneAnn.add(annKey);
+      renderAnnouncementBar();
+    };
+    item.appendChild(doneBtn);
+
+    // Dismiss button
     const dismissBtn = h('button', { className: 'ann-dismiss', title: 'Skryť' }, ['×']);
     dismissBtn.onclick = () => {
-      dismissedAnn.add(ev.id + '-' + ev.y + '-' + ev.m + '-' + ev.day);
+      dismissedAnn.add(annKey);
       renderAnnouncementBar();
     };
     item.appendChild(dismissBtn);
